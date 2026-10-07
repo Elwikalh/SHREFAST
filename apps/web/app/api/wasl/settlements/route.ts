@@ -1,3 +1,4 @@
+import { authorizeWasl } from "@/lib/wasl-access";
 import { readJsonRecord } from "@/lib/wasl-validation";
 import { NextResponse } from "next/server";
 import { createWaslSettlement, listWaslSettlements } from "@/lib/wasl-store";
@@ -17,6 +18,8 @@ function settlementToClient(s: Record<string, unknown>) {
 }
 
 export async function GET(request: Request) {
+	const access = await authorizeWasl(request, "settlements");
+	if (access instanceof Response) return access;
 	const ownerRef = new URL(request.url).searchParams.get("ownerRef") || "";
 	if (!ownerRef)
 		return NextResponse.json(
@@ -39,6 +42,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+	const access = await authorizeWasl(request, "settlements");
+	if (access instanceof Response) return access;
 	let body: Record<string, unknown>;
 	try {
 		body = await readJsonRecord(request);
@@ -46,10 +51,19 @@ export async function POST(request: Request) {
 		return NextResponse.json({ ok: false, error: "bad_json" }, { status: 400 });
 	}
 	const ownerRef = String(body.ownerRef || "").trim();
-	const ownerName = String(body.ownerName || "").trim() || "صاحب حساب";
+	const ownerName =
+		access.role === "admin"
+			? String(body.ownerName || "").trim() || "صاحب حساب"
+			: access.name;
 	const courierName = String(body.courierName || "").trim();
 	const amount = Number(body.amount || 0);
-	if (!ownerRef || !courierName || !(amount > 0)) {
+	if (
+		!ownerRef ||
+		!courierName ||
+		!Number.isSafeInteger(amount) ||
+		amount <= 0 ||
+		amount > 1_000_000
+	) {
 		return NextResponse.json(
 			{ ok: false, error: "invalid_fields" },
 			{ status: 400 },

@@ -3,7 +3,31 @@ import { z } from "zod";
 export async function readJsonRecord(
 	request: Request,
 ): Promise<Record<string, unknown>> {
-	const value: unknown = await request.json();
+	if (!request.body) throw new Error("bad_json");
+	const reader = request.body.getReader();
+	const chunks: Uint8Array[] = [];
+	let size = 0;
+	try {
+		for (;;) {
+			const part = await reader.read();
+			if (part.done) break;
+			size += part.value.byteLength;
+			if (size > 64 * 1024) {
+				void reader.cancel().catch(() => {});
+				throw new Error("bad_json");
+			}
+			chunks.push(part.value);
+		}
+	} finally {
+		reader.releaseLock();
+	}
+	const bytes = new Uint8Array(size);
+	let offset = 0;
+	for (const part of chunks) {
+		bytes.set(part, offset);
+		offset += part.byteLength;
+	}
+	const value: unknown = JSON.parse(new TextDecoder().decode(bytes));
 	if (value === null || typeof value !== "object" || Array.isArray(value))
 		throw new Error("bad_json");
 	return value as Record<string, unknown>;

@@ -9,7 +9,7 @@ import { db } from "@el7bboB/db";
 
 let ensured: Promise<void> | null = null;
 
-function ensureTables(): Promise<void> {
+export function ensureTables(): Promise<void> {
 	if (!ensured) {
 		ensured = (async () => {
 			await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS wasl_order_seq`);
@@ -50,6 +50,18 @@ function ensureTables(): Promise<void> {
 			);
 			await db.execute(
 				sql`ALTER TABLE wasl_orders ADD COLUMN IF NOT EXISTS ready_minutes INTEGER`,
+			);
+			await db.execute(
+				sql`ALTER TABLE wasl_orders ADD COLUMN IF NOT EXISTS merchant_ref TEXT`,
+			);
+			await db.execute(
+				sql`ALTER TABLE wasl_orders ADD COLUMN IF NOT EXISTS company_ref TEXT`,
+			);
+			await db.execute(
+				sql`ALTER TABLE wasl_orders ADD COLUMN IF NOT EXISTS courier_ref TEXT`,
+			);
+			await db.execute(
+				sql`CREATE INDEX IF NOT EXISTS wasl_orders_merchant_idx ON wasl_orders (merchant_ref, created_at DESC)`,
 			);
 			await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS wasl_inbox_seq`);
 			await db.execute(sql`CREATE TABLE IF NOT EXISTS wasl_inbox (
@@ -193,6 +205,9 @@ export function quoteWaslDelivery(merchantZone: string, destZone: string) {
 }
 
 export type WaslOrderRow = {
+	merchant_ref?: string | null;
+	company_ref?: string | null;
+	courier_ref?: string | null;
 	id: number;
 	ref: string;
 	merchant_name: string;
@@ -226,6 +241,8 @@ function rowsOf<T>(result: unknown): T[] {
 }
 
 export async function createWaslOrder(input: {
+	merchantRef?: string;
+	companyRef?: string;
 	merchant: string;
 	merchantZone: string;
 	fromAddr: string;
@@ -253,10 +270,10 @@ export async function createWaslOrder(input: {
 			? null
 			: Math.min(180, Math.max(0, Math.round(input.readyMinutes)));
 	const result = await db.execute(sql`INSERT INTO wasl_orders
-		(ref, merchant_name, merchant_zone, from_addr, dest_zone, to_addr, fee, fee_min, fee_max, km, pay, kind, customer_phone, customer_name, note, order_total, ready_minutes, source, status)
+		(ref, merchant_name, merchant_zone, from_addr, dest_zone, to_addr, fee, fee_min, fee_max, km, pay, kind, customer_phone, customer_name, note, order_total, ready_minutes, source, status, merchant_ref, company_ref)
 		VALUES ('SX-' || nextval('wasl_order_seq'), ${input.merchant}, ${input.merchantZone}, ${input.fromAddr},
 			${input.destZone}, ${input.toAddr}, ${fee}, ${quote.feeMin}, ${quote.feeMax}, ${quote.km},
-			${input.pay || "كاش"}, ${input.kind || null}, ${input.customerPhone || null}, ${input.customerName || null}, ${input.note || null}, ${input.total ?? null}, ${readyMinutes}, ${input.source || "free"}, 'searching')
+			${input.pay || "كاش"}, ${input.kind || null}, ${input.customerPhone || null}, ${input.customerName || null}, ${input.note || null}, ${input.total ?? null}, ${readyMinutes}, ${input.source || "free"}, 'searching', ${input.merchantRef || null}, ${input.companyRef || null})
 		RETURNING *`);
 	const rows = rowsOf<WaslOrderRow>(result);
 	const first = rows[0];
@@ -511,7 +528,7 @@ export type WaslPartnershipInviteRow = {
 
 let ensuredPartnerships: Promise<void> | null = null;
 
-async function ensurePartnershipTables(): Promise<void> {
+export async function ensurePartnershipTables(): Promise<void> {
 	if (!ensuredPartnerships) {
 		ensuredPartnerships = (async () => {
 			await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS wasl_partnership_seq`);
@@ -813,7 +830,7 @@ export type WaslCourierRow = {
 
 let ensuredCouriers: Promise<void> | null = null;
 
-function ensureCourierTables(): Promise<void> {
+export function ensureCourierTables(): Promise<void> {
 	if (!ensuredCouriers) {
 		ensuredCouriers = (async () => {
 			await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS wasl_courier_seq`);
@@ -833,6 +850,9 @@ function ensureCourierTables(): Promise<void> {
 				joined_at TIMESTAMPTZ,
 				UNIQUE(owner_ref, phone)
 			)`);
+			await db.execute(
+				sql`ALTER TABLE wasl_couriers ADD COLUMN IF NOT EXISTS account_id TEXT`,
+			);
 		})().catch((error) => {
 			ensuredCouriers = null;
 			throw error;
@@ -890,12 +910,13 @@ export async function listWaslCouriers(
 export async function joinWaslCourier(
 	phone: string,
 	code: string,
+	accountId: string,
 ): Promise<WaslCourierRow | null> {
 	await ensureTables();
 	await ensureCourierTables();
 	const clean = phone.replace(/\s+/g, "");
 	const result =
-		await db.execute(sql`UPDATE wasl_couriers SET status = 'active', joined_at = now()
+		await db.execute(sql`UPDATE wasl_couriers SET status = 'active', joined_at = now(), account_id = ${accountId}
 		WHERE phone = ${clean} AND UPPER(invite_code) = ${code.toUpperCase()} AND status = 'invited' RETURNING *`);
 	const rows = rowsOf<WaslCourierRow>(result);
 	return rows[0] ?? null;
@@ -918,7 +939,7 @@ export type WaslClientInviteRow = {
 
 let ensuredClientInvites: Promise<void> | null = null;
 
-function ensureClientInviteTables(): Promise<void> {
+export function ensureClientInviteTables(): Promise<void> {
 	if (!ensuredClientInvites) {
 		ensuredClientInvites = (async () => {
 			await db.execute(
@@ -1007,7 +1028,7 @@ export type WaslSettlementRow = {
 
 let ensuredSettlements: Promise<void> | null = null;
 
-function ensureSettlementTables(): Promise<void> {
+export function ensureSettlementTables(): Promise<void> {
 	if (!ensuredSettlements) {
 		ensuredSettlements = (async () => {
 			await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS wasl_settlement_seq`);
@@ -1063,7 +1084,7 @@ export async function listWaslSettlements(
 // ===== Settings (إعدادات محفوظة: رسوم الشركات ونحوها) =====
 let ensuredSettings: Promise<void> | null = null;
 
-function ensureSettingsTable(): Promise<void> {
+export function ensureSettingsTable(): Promise<void> {
 	if (!ensuredSettings) {
 		ensuredSettings = (async () => {
 			await db.execute(sql`CREATE TABLE IF NOT EXISTS wasl_settings (
@@ -1304,7 +1325,7 @@ export function waslCourierAccountToClient(row: WaslCourierAccountRow) {
 		ref: row.ref,
 		name: row.name,
 		phone: row.phone,
-		nationalId: row.national_id,
+
 		vehicle: row.vehicle,
 		governorate: row.governorate,
 		zone: row.zone,

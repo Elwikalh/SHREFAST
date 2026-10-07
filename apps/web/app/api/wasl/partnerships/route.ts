@@ -1,3 +1,4 @@
+import { authorizeWasl } from "@/lib/wasl-access";
 import { readJsonRecord } from "@/lib/wasl-validation";
 import { NextResponse } from "next/server";
 import {
@@ -45,12 +46,21 @@ function partnershipToClient(
 }
 
 export async function GET(request: Request) {
+	const access = await authorizeWasl(request, "partnerships");
+	if (access instanceof Response) return access;
 	const zone = new URL(request.url).searchParams.get("zone") || undefined;
 	try {
 		const rows = await listWaslPartnerships(zone);
 		const partnerships = [];
 		for (const row of rows) {
 			const full = await getWaslPartnership(row.ref);
+			if (
+				access.role !== "admin" &&
+				full &&
+				full.partnership.founder_ref !== access.ref &&
+				!full.members.some((m) => m.entity_ref === access.ref)
+			)
+				continue;
 			const client = partnershipToClient(full);
 			if (client) {
 				client.usage = await partnershipUsageCounts(row.ref);
@@ -68,6 +78,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+	const access = await authorizeWasl(request, "partnerships");
+	if (access instanceof Response) return access;
 	let body: Record<string, unknown>;
 	try {
 		body = await readJsonRecord(request);

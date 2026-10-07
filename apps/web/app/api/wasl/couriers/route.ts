@@ -1,3 +1,5 @@
+import { normalizeEgyptPhone } from "@/lib/wasl-auth-schema";
+import { authorizeWasl } from "@/lib/wasl-access";
 import { readJsonRecord } from "@/lib/wasl-validation";
 import { NextResponse } from "next/server";
 import { createWaslCourier, listWaslCouriers } from "@/lib/wasl-store";
@@ -20,6 +22,8 @@ function courierToClient(c: Record<string, unknown>) {
 }
 
 export async function GET(request: Request) {
+	const access = await authorizeWasl(request, "couriers");
+	if (access instanceof Response) return access;
 	const ownerRef = new URL(request.url).searchParams.get("ownerRef") || "";
 	if (!ownerRef)
 		return NextResponse.json(
@@ -39,6 +43,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+	const access = await authorizeWasl(request, "couriers");
+	if (access instanceof Response) return access;
 	let body: Record<string, unknown>;
 	try {
 		body = await readJsonRecord(request);
@@ -47,13 +53,18 @@ export async function POST(request: Request) {
 	}
 	const ownerRef = String(body.ownerRef || "").trim();
 	const ownerType =
-		String(body.ownerType || "merchant") === "company" ? "company" : "merchant";
-	const ownerName = String(body.ownerName || "").trim();
+		access.role === "admin"
+			? String(body.ownerType) === "company"
+				? "company"
+				: "merchant"
+			: (access.role as "company" | "merchant");
+	const ownerName =
+		access.role === "admin" ? String(body.ownerName || "").trim() : access.name;
 	const name = String(body.name || "").trim();
-	const phone = String(body.phone || "").replace(/\s+/g, "");
+	const phone = normalizeEgyptPhone(String(body.phone || ""));
 	const zone = String(body.zone || "").trim();
 	const vehicle = String(body.vehicle || "moto").trim();
-	if (!ownerRef || name.length < 2 || phone.length < 8 || !zone) {
+	if (!ownerRef || name.length < 2 || !/^01[0125]\d{8}$/.test(phone) || !zone) {
 		return NextResponse.json(
 			{ ok: false, error: "invalid_fields" },
 			{ status: 400 },

@@ -1,3 +1,4 @@
+import { authorizeWasl } from "@/lib/wasl-access";
 import { readJsonRecord } from "@/lib/wasl-validation";
 import { NextResponse } from "next/server";
 import {
@@ -8,7 +9,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
+	const access = await authorizeWasl(request, "inbox");
+	if (access instanceof Response) return access;
 	try {
 		const rows = await listWaslInbox(30);
 		return NextResponse.json({
@@ -25,6 +28,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+	const access = await authorizeWasl(request, "inbox");
+	if (access instanceof Response) return access;
 	let body: Record<string, unknown>;
 	try {
 		body = await readJsonRecord(request);

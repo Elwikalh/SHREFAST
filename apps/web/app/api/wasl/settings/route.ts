@@ -1,3 +1,4 @@
+import { authorizeWasl } from "@/lib/wasl-access";
 import { readJsonRecord } from "@/lib/wasl-validation";
 import { NextResponse } from "next/server";
 import { getWaslSetting, setWaslSetting } from "@/lib/wasl-store";
@@ -5,6 +6,8 @@ import { getWaslSetting, setWaslSetting } from "@/lib/wasl-store";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
+	const access = await authorizeWasl(request, "settings");
+	if (access instanceof Response) return access;
 	const key = new URL(request.url).searchParams.get("key") || "";
 	if (!key)
 		return NextResponse.json(
@@ -24,6 +27,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+	const access = await authorizeWasl(request, "settings");
+	if (access instanceof Response) return access;
 	let body: Record<string, unknown>;
 	try {
 		body = await readJsonRecord(request);

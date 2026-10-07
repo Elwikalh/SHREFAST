@@ -7,7 +7,11 @@ WORKDIR /app
 FROM base AS builder
 COPY . .
 RUN pnpm install --frozen-lockfile
+# Enforce local quality gates even before GitHub Actions can be enabled.
+# Embedded PostgreSQL tests do not connect to the production DATABASE_URL.
+RUN pnpm lint && pnpm test
 RUN pnpm --filter @el7bboB/web... build
+RUN pnpm typecheck
 
 FROM base AS runner
 ENV NODE_ENV=production

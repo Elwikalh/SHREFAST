@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { apiFetch } from "../../lib/wasl-api";
 // Recovered from the original shipped portal; keep behavior while incrementally refactoring.
 import * as ReactNamespace from "react";
@@ -7795,7 +7796,7 @@ var s = jsxRuntime,
 var pf = "وسط البلد",
 	Hm = "sx:companyRef",
 	id = (e) => Yt[e] || { t: e || "—", c: "b-gray" };
-function Gm({ cur: e, go: a, store: t }) {
+function Gm({ cur: e, go: a, store: t, initialRef = "" }) {
 	Fm.some((m) => m.items.some((_) => _.id === e)) || (e = "home");
 	let {
 			orders: l,
@@ -7821,7 +7822,7 @@ function Gm({ cur: e, go: a, store: t }) {
 		[ge, je] = be.default.useState([]),
 		[J, Zt] = be.default.useState(() => {
 			try {
-				return localStorage.getItem(Hm) || "";
+				return initialRef || "";
 			} catch {
 				return "";
 			}
@@ -11520,6 +11521,7 @@ function ty({ c: e, icon: a, children: t }) {
 	});
 }
 function Vm({ store: e }) {
+ const router = useRouter();
 	let {
 			orders: a,
 			courierOn: t,
@@ -11561,7 +11563,7 @@ function Vm({ store: e }) {
 			try {
 				localStorage.removeItem("wasl_courier_acct");
 			} catch {}
-			(r(null), C(!0), za("home"));
+			apiFetch("/api/wasl/auth/logout", { method: "POST" }).then(response => { if(response.ok)router.replace("/login"); }).catch(() => n("تعذر تسجيل الخروج؛ حاول مرة أخرى."));
 		};
 	ut.default.useEffect(() => {
 		if (!i || !i.ref) return;
@@ -13923,30 +13925,28 @@ function x2({ goPortal: e, toast: a }) {
 				],
 			});
 }
-function L2() {
+function L2({ principal }) {
+ const router = useRouter();
 	let e = (() => {
 			let N = (location.hash || "").replace(/^#/, ""),
 				Q = N.indexOf("?");
 			return new URLSearchParams(Q < 0 ? "" : N.slice(Q + 1));
 		})(),
-		a = e.get("ref") || "",
+		a = principal.ref,
 		t = e.get("page") || "",
 		l = e.get("embed") === "1",
 		[u, o] = we.default.useState(
-			() => (location.hash || "").replace(/^#/, "").split("?")[0] || "home",
+			() => principal.role,
 		),
 		[n, i] = we.default.useState(
 			() =>
 				t ||
-				((location.hash || "").startsWith("#m") ||
-				(location.hash || "").startsWith("#c")
-					? "home"
-					: "over"),
+				(principal.role === "admin" ? "over" : "home"),
 		),
 		[r, y] = we.default.useState(
-			Y0.map((N) => ({ ...N, ts: Date.now() - Math.random() * 9 * 6e4 })),
+			[],
 		),
-		[C] = we.default.useState(Hu),
+		[C, setCouriers] = we.default.useState([]),
 		[I, h] = we.default.useState(() => {
 			try {
 				return localStorage.getItem("wasl_courier_on") !== "0";
@@ -13993,133 +13993,38 @@ function L2() {
 			(D(N), setTimeout(() => D(null), 2800));
 		},
 		W = (N) => {
-			(o(N), i(N === "admin" ? "over" : "home"));
-		},
+   if (N === "home") { router.push("/"); return; }
+   if (N !== principal.role) return;
+   (o(N), i(N === "admin" ? "over" : "home"));
+  },
 		na = () => H((N) => N + 1),
 		aa = we.default.useRef(4200),
-		Ia = (N, Q, ae) => {
-			!N ||
-				!N.real ||
-				apiFetch("/api/wasl/advance", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ ref: N.id, status: Q, courier: ae }),
-				}).catch(() => {});
-		},
-		za = (N) => {
-			let Q = "#" + ++aa.current,
-				ae = g.current.merchantCfg,
-				Ie = {
-					...N,
-					id: Q,
-					time: "الآن",
-					courier: null,
-					ts: Date.now(),
-					status: "searching",
-					manual: ae.mode !== "auto",
-				};
-			(y((re) => [Ie, ...re]),
-				apiFetch("/api/wasl/orders", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						merchant: N.merchant,
-						merchantZone: N.merchantZone || "",
-						fromAddr: N.from,
-						destZone: N.zone,
-						toAddr: N.to,
-						fee: N.fee,
-						pay: N.pay,
-						kind: N.kind,
-						customerPhone: N.cust,
-						customerName: N.custName || void 0,
-						source: N.source,
-						readyMinutes: N.readyMin === void 0 ? void 0 : N.readyMin,
-						note: N.note || void 0,
-					}),
-				})
-					.then((re) => (re.ok ? re.json() : null))
-					.then((re) => {
-						re &&
-							re.ok &&
-							re.order &&
-							y((ot) =>
-								ot.map((k) =>
-									k.id === Q
-										? {
-												...k,
-												id: re.order.ref,
-												real: !0,
-												km: re.order.km ?? k.km,
-												feeMin: re.order.feeMin ?? k.feeMin,
-												feeMax: re.order.feeMax ?? k.feeMax,
-											}
-										: k,
-								),
-							);
-					})
-					.catch(() => {}));
-		},
-		jt = (N, Q) =>
-			y((ae) =>
-				ae.map((Ie) => {
-					if (Ie.id !== N) return Ie;
-					Ia(Ie, "accepted", Q);
-					let re = Math.round((Ie.km || 4) * 3 + 8) + " د";
-					return {
-						...Ie,
-						status: "accepted",
-						courier: Q,
-						ts: Date.now(),
-						eta: re,
-					};
-				}),
-			),
-		ba = (N) => {
-			(y((Q) =>
-				Q.map((ae) =>
-					ae.id === N ? { ...ae, manual: !0, ts: Date.now() } : ae,
-				),
-			),
-				fe("تم رفض الطلب — أُعيد لطابور الإسناد"));
-		},
-		Z = (N, Q) =>
-			y((ae) =>
-				ae.map((Ie) =>
-					Ie.id !== N
-						? Ie
-						: (Ia(Ie, Q),
-							{
-								...Ie,
-								status: Q,
-								ts: Date.now(),
-								eta:
-									Q === "delivered"
-										? "تم"
-										: Q === "heading"
-											? "في الطريق"
-											: Q === "arrived"
-												? "وصل"
-												: "قيد التحضير",
-							}),
-				),
-			),
-		ge = (N, Q) =>
-			y((ae) =>
-				ae.map((Ie) => {
-					if (Ie.id !== N) return Ie;
-					Ia(Ie, "accepted", Q);
-					let re = Math.round((Ie.km || 4) * 3 + 8) + " د";
-					return {
-						...Ie,
-						status: "accepted",
-						courier: Q,
-						ts: Date.now(),
-						eta: re,
-						manual: !1,
-					};
-				}),
-			);
+  Ia = async (N, status, courierName) => {
+   if (!N || !N.real) return false;
+   const courier = C.find(item => item.name === courierName);
+   try {
+    const response = await apiFetch("/api/wasl/advance", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ ref: N.id, status, courierRef: courier?.ref }) });
+    const data = await response.json();
+    if (!response.ok || !data.order) { fe("لم تُحفظ الحالة — قد يكون الطلب تغيّر أو لا تملك صلاحية الإجراء."); return false; }
+    y(previous => previous.map(item => item.id === N.id ? data.order : item)); return true;
+   } catch { fe("تعذر حفظ الحالة. راجع اتصالك وأعد المحاولة."); return false; }
+  },
+  za = async (N) => {
+   try {
+    const response = await apiFetch("/api/wasl/orders", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ merchant: principal.name, merchantZone: principal.zone, fromAddr: principal.address, destZone: N.zone, toAddr: N.to, fee: N.fee, pay: N.pay, kind: N.kind, customerPhone: N.cust, customerName: N.custName, note: N.note, total: N.total, readyMinutes: N.readyMin, source: N.source }) });
+    const data = await response.json();
+    if (!response.ok || !data.order) { fe("لم يتم حفظ الطلب. راجع البيانات واتصال الخدمة؛ لن نعرض طلبًا وهميًا."); return false; }
+    y(previous => [data.order, ...previous]); fe("تم حفظ الطلب بنجاح"); return true;
+   } catch { fe("تعذر حفظ الطلب. بيانات الطلب لم تُرسل بنجاح."); return false; }
+  },
+  jt = (ref, courier) => Ia(r.find(order => order.id === ref), "accepted", courier),
+  ba = () => fe("الرفض لا يغير الطلب المحفوظ؛ راجع الإسناد مع مالك الحساب."),
+  Z = (ref, status) => Ia(r.find(order => order.id === ref), status),
+  ge = (ref, courier) => Ia(r.find(order => order.id === ref), "accepted", courier);
+ we.default.useEffect(() => {
+  if (principal.role === "merchant" || principal.role === "company") apiFetch("/api/wasl/couriers?ownerRef=" + encodeURIComponent(principal.ref)).then(response => response.json()).then(data => { if (data.ok) setCouriers(data.couriers || []); }).catch(() => {});
+ }, [principal.ref]);
+
 	we.default.useEffect(() => {
 		let N = () => {
 			apiFetch("/api/wasl/orders")
@@ -14292,7 +14197,7 @@ function L2() {
 				role: "لوحة تحكم المنصة",
 				footNote: {
 					title: "حالة النظام",
-					text: "تعمل جميع الخدمات بشكل طبيعي.",
+					text: "راجع حالات الاتصال قبل تنفيذ الإجراء.",
 				},
 			},
 			merchant: {
@@ -14306,11 +14211,11 @@ function L2() {
 			},
 			company: {
 				logo: "س",
-				name: "سرعة إكسبرس",
+				name: principal.name,
 				role: "بوابة شركة التوصيل",
 				footNote: {
-					title: "باقة المؤسسية",
-					text: "دعم فوري 24/7 مع مدير حساب مخصص.",
+					title: "حساب شركتك",
+					text: "صلاحيات الشركة وبياناتها مرتبطة بالجلسة المسجلة.",
 				},
 			},
 		}[u];
@@ -14330,7 +14235,7 @@ function L2() {
 							initialRef: a,
 							onHasPool: P,
 						}),
-					u === "company" && (0, A.jsx)(Gm, { cur: n, go: i, store: je }),
+					u === "company" && (0, A.jsx)(Gm, { cur: n, go: i, store: je, initialRef: principal.ref }),
 				],
 			}),
 			x &&
@@ -14342,6 +14247,6 @@ function L2() {
 	});
 }
 
-export default function WaslPortal() {
-	return jsxRuntime.jsx(Xm, { children: jsxRuntime.jsx(L2, {}) });
+export default function WaslPortal({ principal }) {
+	return jsxRuntime.jsx(Xm, { children: jsxRuntime.jsx(L2, { principal }) });
 }

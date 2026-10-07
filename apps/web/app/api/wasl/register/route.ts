@@ -1,3 +1,4 @@
+import { authorizeWasl } from "@/lib/wasl-access";
 import { readJsonRecord } from "@/lib/wasl-validation";
 import { NextResponse } from "next/server";
 import { registerWaslEntity, updateWaslEntityProfile } from "@/lib/wasl-store";
@@ -5,6 +6,8 @@ import { registerWaslEntity, updateWaslEntityProfile } from "@/lib/wasl-store";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+	const access = await authorizeWasl(request, "register");
+	if (access instanceof Response) return access;
 	let body: Record<string, unknown>;
 	try {
 		body = await readJsonRecord(request);

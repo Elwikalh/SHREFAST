@@ -1,3 +1,5 @@
+import { normalizeEgyptPhone } from "@/lib/wasl-auth-schema";
+import { authorizeWasl } from "@/lib/wasl-access";
 import { readJsonRecord } from "@/lib/wasl-validation";
 import { NextResponse } from "next/server";
 import { inviteWaslPartner } from "@/lib/wasl-store";
@@ -5,6 +7,8 @@ import { inviteWaslPartner } from "@/lib/wasl-store";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+	const access = await authorizeWasl(request, "partnerships/invite");
+	if (access instanceof Response) return access;
 	let body: Record<string, unknown>;
 	try {
 		body = await readJsonRecord(request);
@@ -14,8 +18,8 @@ export async function POST(request: Request) {
 	const partnershipRef = String(body.partnershipRef || "").trim();
 	const fromRef = String(body.fromRef || "").trim();
 	const fromName = String(body.fromName || "").trim() || "مؤسس الشراكة";
-	const toPhone = String(body.toPhone || "").replace(/\s+/g, "");
-	if (!partnershipRef || !fromRef || toPhone.length < 8) {
+	const toPhone = normalizeEgyptPhone(String(body.toPhone || ""));
+	if (!partnershipRef || !fromRef || !/^01[0125]\d{8}$/.test(toPhone)) {
 		return NextResponse.json(
 			{ ok: false, error: "invalid_fields" },
 			{ status: 400 },
