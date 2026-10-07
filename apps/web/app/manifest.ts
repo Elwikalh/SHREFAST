@@ -1,2 +1,0 @@
-import type { MetadataRoute } from "next"
-export default function manifest():MetadataRoute.Manifest{return{name:"الحَبّوب | El7bboB",short_name:"الحَبّوب",description:"قائمة طعام وطلبات توصيل الحَبّوب",start_url:"/",display:"standalone",background_color:"#fdf6e7",theme_color:"#f7ae33",lang:"ar",dir:"rtl",categories:["food","shopping"],icons:[{src:"/icon.svg",sizes:"any",type:"image/svg+xml",purpose:"any"}]}}
