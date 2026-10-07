@@ -19,67 +19,44 @@ import {
 	Zap,
 } from "lucide-react";
 import styles from "./site.module.css";
-import { ShareFastMark } from "../brand/share-fast-mark";
-import { ShareFastWordmark } from "../brand/share-fast-wordmark";
-export function Brand() {
- return <Link href="/" className={styles.brand} dir="ltr" aria-label="SHARE FAST — الرئيسية">
-  <span className={styles.brandMark}><ShareFastMark /></span>
-  <ShareFastWordmark className={styles.wordmark} />
- </Link>;
-}
+import { Brand } from "./brand";
+import SiteHeader from "./header";
+export { Brand } from "./brand";
 export default function Landing() {
 	return (
 		<div className={styles.site}>
 			<a href="#main-content" className={styles.skip}>
 				انتقل للمحتوى
 			</a>
-			<header className={styles.header}>
-				<div className={styles.headerInner}>
-					<Brand />
-					<nav className={styles.nav} aria-label="القائمة الرئيسية">
-						<a href="#solutions">لمن صُممت؟</a>
-						<a href="#how">كيف تبدأ؟</a>
-						<a href="#faq">الأسئلة الشائعة</a>
-					</nav>
-					<div className={styles.headerActions}>
-						<Link href="/login" className={styles.textLink}>
-							تسجيل الدخول
-						</Link>
-						<Link href="/register" className={styles.smallPrimary}>
-							ابدأ الآن <ArrowLeft size={16} />
-						</Link>
-					</div>
-				</div>
-			</header>
+			<SiteHeader />
 			<main id="main-content">
 				<section className={styles.hero}>
 					<div className={styles.heroCopy}>
 						<span className={styles.eyebrow}>
-							<span className={styles.statusDot} /> مساحة واحدة لإدارة التوصيل
+							<span className={styles.statusDot} /> إدارة التوصيل، ببساطة
 						</span>
 						<h1>
-							كل طلب.
+							كل طلب،
 							<br />
-							<span>في الاتجاه الصحيح.</span>
+							<span>تحت السيطرة.</span>
 						</h1>
 						<p className={styles.heroDescription}>
-							من نشاطك التجاري إلى آخر نقطة تسليم. اجمع طلباتك، وفريقك، وشركة
-							التوصيل في تجربة عربية واحدة — بدل المتابعة المبعثرة.
+							أنشئ طلبات التوصيل، نظّم فريقك، وتابع حالة كل طلب من لوحة واحدة. تجربة عربية واضحة، على الموبايل والكمبيوتر.
 						</p>
 						<div className={styles.ctaRow}>
 							<Link href="/register" className={styles.primary}>
 								أنشئ حسابك <ArrowLeft size={19} />
 							</Link>
 							<a href="#how" className={styles.secondary}>
-								شوف كيف تبدأ <ArrowUpLeft size={18} />
+								كيف تعمل المنصة؟ <ArrowUpLeft size={18} />
 							</a>
 						</div>
 						<div className={styles.heroNotes}>
 							<span>
-								<Check size={16} /> تسجيل يناسب نوع نشاطك
+								<Check size={16} /> حساب مناسب لطبيعة عملك
 							</span>
 							<span>
-								<Check size={16} /> حساب مستقل بكلمة مرور
+								<Check size={16} /> دخول خاص بكلمة مرور
 							</span>
 						</div>
 					</div>
@@ -89,7 +66,7 @@ export default function Landing() {
 					>
 						<div className={styles.visualTop}>
 							<span>
-								<Layers3 size={18} /> مساحة التشغيل
+								<Layers3 size={18} /> لوحة الطلبات
 							</span>
 							<span className={styles.previewTag}>معاينة توضيحية</span>
 						</div>
@@ -97,7 +74,7 @@ export default function Landing() {
 							<div className={styles.visualHeading}>
 								<div>
 									<span className={styles.muted}>متابعة الطلب</span>
-									<h2>من أول طلب… لآخر خطوة.</h2>
+									<h2>متابعة الطلب، خطوة بخطوة</h2>
 								</div>
 								<span className={styles.visualIcon}>
 									<Package size={24} />
@@ -140,17 +117,17 @@ export default function Landing() {
 									</span>
 									<div>
 										<b>المندوب المكلّف</b>
-										<small>كل خطوة، في مكانها.</small>
+										<small>من الاستلام حتى التسليم</small>
 									</div>
 									<span className={styles.miniStatus}>متابعة الحالة</span>
 								</div>
 							</div>
 							<div className={styles.visualBottom}>
 								<span>
-									<LockKeyhole size={15} /> بيانات حسابك داخل جلستك
+									<LockKeyhole size={15} /> وصول خاص لحسابك
 								</span>
 								<span>
-									<Route size={16} /> تجربة عربية RTL
+									<Route size={16} /> واجهة عربية واضحة
 								</span>
 							</div>
 						</div>
@@ -159,8 +136,8 @@ export default function Landing() {
 								<Check size={17} />
 							</span>
 							<div>
-								<b>الوضوح يصنع الفرق.</b>
-								<small>الطلبات والفريق في مساحة واحدة</small>
+								<b>كل التفاصيل أمامك</b>
+								<small>حالة الطلب والمندوب في لوحة واحدة</small>
 							</div>
 						</div>
 					</div>
@@ -169,36 +146,35 @@ export default function Landing() {
 					<div>
 						<Route />
 						<span>
-							<b>من أول طلب لآخر تسليم</b>
+							<b>تابع كل مرحلة</b>
 							<small>متابعة واضحة لحالة كل طلب</small>
 						</span>
 					</div>
 					<div>
 						<ShieldCheck />
 						<span>
-							<b>حسابك مش مجرد رابط</b>
+							<b>بياناتك تخص حسابك</b>
 							<small>تسجيل دخول وصلاحيات للحساب</small>
 						</span>
 					</div>
 					<div>
 						<Zap />
 						<span>
-							<b>واجهة عربية، بدون تعقيد</b>
+							<b>اعمل من أي جهاز</b>
 							<small>على الكمبيوتر والموبايل</small>
 						</span>
 					</div>
 				</section>
 				<section id="solutions" className={styles.section}>
 					<div className={styles.sectionIntro}>
-						<span className={styles.eyebrow}>كل دور له مساحته</span>
+						<span className={styles.eyebrow}>مصممة لطبيعة عملك</span>
 						<h2>
-							منظومة واحدة.
+							ثلاثة أدوار.
 							<br />
-							تجربة مناسبة لشغلك.
+							منصة واحدة.
 						</h2>
 						<p>
-							اختر نوع حسابك من البداية. كل بوابة تركز على التفاصيل التي تحتاجها
-							أنت.
+							نشاط تجاري، شركة توصيل، أو مندوب. اختر دورك واحصل على لوحة تناسب مهامك اليومية.
 						</p>
 					</div>
 					<div className={styles.solutions}>
@@ -243,13 +219,12 @@ export default function Landing() {
 					<div className={styles.howHeading}>
 						<span className={styles.eyebrow}>بداية واضحة</span>
 						<h2>
-							مسافة قصيرة
+							ابدأ بخطوات بسيطة،
 							<br />
-							بينك وبين حسابك.
+							وأكمل عملك بوضوح.
 						</h2>
 						<p>
-							لا حاجة للتنقل بين بوابات مختلفة للتسجيل. بداية واحدة، وتجربة
-							مرتبة.
+							اختر نوع الحساب، أضف بياناتك، ثم أنشئ كلمة مرور للدخول.
 						</p>
 						<Link href="/register" className={styles.secondary}>
 							ابدأ التسجيل <ArrowLeft size={18} />
@@ -262,12 +237,12 @@ export default function Landing() {
 								text: "نشاط تجاري، شركة توصيل، أو مندوب. نعرض لك فقط البيانات المناسبة لدورك.",
 							},
 							{
-								title: "عرّفنا بشغلك",
+								title: "أضف بيانات العمل",
 								text: "أضف الاسم، والمحافظة، والمنطقة والعنوان. للشركات، حدد مناطق التغطية أيضًا.",
 							},
 							{
-								title: "أنشئ دخولك الآمن",
-								text: "رقم موبايل وكلمة مرور. بعد التسجيل تدخل مباشرة إلى بوابة حسابك، وليس حسابًا تجريبيًا.",
+								title: "أمّن حسابك",
+								text: "أضف رقم الموبايل وكلمة المرور. بعد التسجيل، انتقل مباشرة إلى لوحة حسابك.",
 							},
 						].map((step, i) => (
 							<li key={step.title}>
@@ -283,11 +258,11 @@ export default function Landing() {
 				<section id="faq" className={styles.section}>
 					<div className={styles.faqLayout}>
 						<div>
-							<span className={styles.eyebrow}>قبل ما تبدأ</span>
+							<span className={styles.eyebrow}>الأسئلة الشائعة</span>
 							<h2 className={styles.sectionTitle}>
-								إجابات بسيطة.
+								كل ما تحتاج معرفته
 								<br />
-								لبداية أفضل.
+								قبل التسجيل.
 							</h2>
 						</div>
 						<div className={styles.faqs}>
@@ -297,11 +272,11 @@ export default function Landing() {
 									a: "لو لديك نشاط يرسل طلبات للعملاء اختر النشاط التجاري. لو تدير شركة وفريق توصيل اختر شركة التوصيل. ولو تعمل في التسليم بنفسك اختر المندوب.",
 								},
 								{
-									q: "هل بياناتي مفتوحة لأي شخص معه الرابط؟",
+									q: "من يمكنه الوصول إلى بيانات حسابي؟",
 									a: "الصفحات التشغيلية تتطلب تسجيل الدخول. مرجع الحساب وحده لا يمنح الوصول إلى بياناته، ولا يسمح بتعديل حساب آخر.",
 								},
 								{
-									q: "عندي بيانات مسجلة بالنظام القديم. أعمل إيه؟",
+									q: "لدي حساب قديم. كيف أستعيد الوصول؟",
 									a: "حسابات المناديب التي لها كلمة مرور سابقة يمكنها الدخول من الصفحة الجديدة. سجلات الأنشطة والشركات القديمة التي بلا كلمة مرور تحتاج تثبيت ملكية من إدارة المنصة؛ لا ننقلها تلقائيًا بمجرد معرفة رقم الهاتف.",
 								},
 								{
@@ -322,21 +297,21 @@ export default function Landing() {
 				</section>
 				<section className={styles.finalCta}>
 					<span className={styles.eyebrow}>
-						<Sparkles size={16} /> شغل مرتب. بداية أهدى.
+						<Sparkles size={16} /> خطوتك التالية
 					</span>
 					<h2>
-						خلي التوصيل جزءًا
+						ابدأ اليوم.
 						<br />
-						من نظامك، مش من قلقك.
+						نظّم توصيلك من مكان واحد.
 					</h2>
 					<Link href="/register" className={styles.primary}>
-						ابدأ بحسابك <ArrowLeft size={19} />
+						إنشاء حساب جديد <ArrowLeft size={19} />
 					</Link>
 				</section>
 			</main>
 			<footer className={styles.footer}>
 				<Brand />
-				<p>طلباتك، فريقك، وخطوتك التالية.</p>
+				<p>إدارة أوضح لطلباتك وفريقك.</p>
 				<div>
 					<Link href="/privacy">بيانات التسجيل</Link>
 					<Link href="/login">تسجيل الدخول</Link>

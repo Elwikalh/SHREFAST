@@ -86,21 +86,20 @@ export default function WaslClient() {
 		<>
 			<div className="account-session-bar">
 				<span>
-					{user.name}{" "}
+					<b>{user.name}</b>{" "}
 					<small>
 						{user.phoneVerified
 							? "رقم الهاتف موثّق"
-							: "حساب مسجل — ملكية الهاتف تحتاج تحققًا منفصلًا"}
+							: "رقم الهاتف غير موثّق"}
 					</small>
 				</span>
 				<button onClick={logout}>
-					<LogOut size={16} aria-hidden="true" /> خروج
+					<LogOut size={16} aria-hidden="true" /> تسجيل الخروج
 				</button>
 			</div>
 			{["admin", "company"].includes(user.role) && (
 				<div className="portal-review-notice" role="note">
-					تنبيه مراجعة: بعض تقارير البوابات القديمة تحتوي بيانات عرض تجريبية. لا
-					تعتمد عليها للحسابات المالية؛ الطلبات المرتبطة بحسابك تأتي من الخادم.
+					بعض التقارير تحتوي بيانات توضيحية ولا تصلح للحسابات المالية. الطلبات المرتبطة بحسابك تُحمّل من الخادم.
 				</div>
 			)}
 			<Portal principal={user} />

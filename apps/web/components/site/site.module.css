@@ -911,7 +911,7 @@
 }
 .input::placeholder {
 	color: var(--muted);
-	opacity: 0.7;
+	opacity: 1;
 }
 .input:focus {
 	border-color: var(--accent);
@@ -1466,17 +1466,160 @@
 	}
 }
 
-/* SHARE FAST: one shared route, a clear English wordmark, and a compact mobile lockup. */
-.wordmark{font-family:Arial,Helvetica,sans-serif;display:inline-flex;align-items:baseline;gap:6px;font-size:21px;font-weight:900;letter-spacing:.65px;line-height:1;white-space:nowrap}
-.wordmarkFast{color:var(--accent)}
-.brandMark{border-radius:11px;flex-shrink:0}.brandMark svg{display:block}
-@media(max-width:480px){.wordmark{font-size:16px;gap:4px;letter-spacing:.2px}.brand{gap:9px}.brandMark{width:36px;height:36px;border-radius:9px}.brandMark svg{width:29px;height:29px}}
-@media(max-width:360px){.headerInner{padding-inline:12px;gap:8px}.headerActions{gap:8px}.smallPrimary{padding-inline:9px}.wordmark{font-size:15px}.headerInner .brand{gap:7px}}
 
-/* Bespoke vector wordmark: faceted SHARE and forward-leaning FAST. */
-.wordmark{display:block;width:158px;height:auto;overflow:visible;flex-shrink:0;color:var(--text)}
-.brandMark svg{width:36px;height:36px}
-@media(max-width:480px){.wordmark{width:114px;height:auto}.brandMark{width:38px;height:38px}.brandMark svg{width:33px;height:33px}.brand{gap:8px}}
-@media(max-width:360px){.wordmark{width:103px}.brandMark{width:34px;height:34px}.brandMark svg{width:30px;height:30px}}
-@media(max-width:480px){.headerInner .wordmark{width:106px}.headerInner .brand{gap:7px}.headerInner .brandMark{width:36px;height:36px}.headerActions{gap:8px}}
-@media(max-width:360px){.headerInner{flex-wrap:wrap;row-gap:12px}.headerInner .wordmark{width:126px}.headerActions{width:100%;justify-content:space-between}}
+/* SHARE FAST — readable navigation and consistent responsive proportions. */
+.site { font-family: "Cairo", Tahoma, Arial, sans-serif; line-height: 1.75; }
+.header { position: relative; z-index: 40; }
+.headerInner { max-width: 1200px; padding: 18px 32px; gap: 24px; }
+.brand { gap: 12px; }
+.brandMark { border-radius: 10px; flex-shrink: 0; width: 44px; height: 44px; }
+.brandMark svg { display: block; width: 36px; height: 36px; }
+.wordmark { display: block; width: 166px; height: auto; flex-shrink: 0; color: var(--text); }
+.nav { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; }
+.nav a { color: var(--text); padding: 10px 14px; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; border-radius: 8px; white-space: nowrap; }
+.nav a:hover { color: var(--accent); background: var(--soft); }
+.nav a svg { display: none; }
+.headerActions { display: flex; align-items: center; gap: 12px; font-size: 16px; }
+.headerLogin { color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+.headerLogin:hover { border-color: var(--accent); color: var(--accent); }
+.smallPrimary { font-size: 16px; padding: 10px 18px; min-height: 48px; }
+.menuToggle { display: none; }
+.hero { max-width: 1200px; gap: 56px; padding: 72px 32px; }
+.heroCopy h1 { font-size: clamp(40px, 4.2vw, 58px); line-height: 1.35; letter-spacing: 0; margin: 24px 0; }
+.heroDescription { font-size: 18px; line-height: 1.9; margin-bottom: 28px; }
+.eyebrow { font-size: 15px; letter-spacing: 0; }
+.heroNotes { font-size: 15px; font-weight: 600; gap: 12px; }
+.primary, .secondary { font-size: 16px; min-height: 52px; padding: 12px 22px; }
+.productVisual { border-radius: 12px; box-shadow: 0 12px 32px -20px #26474944; }
+.visualTop { border-radius: 11px 11px 0 0; font-size: 16px; padding: 18px 24px; }
+.visualHeading h2 { font-size: 20px; line-height: 1.6; }
+.visualMain { padding: 24px; }
+.previewOrder { padding: 20px; }
+.visualBottom { font-size: 14px; gap: 12px; }
+.visualHeading, .routePoint, .courierRow { min-width: 0; }
+.floatingNote { margin: 0 24px 24px; padding: 16px; }
+.valueStrip { max-width: 1136px; margin: 0 auto; padding: 28px 0; }
+.valueStrip b { font-size: 16px; }
+.valueStrip small { font-size: 14px; }
+.section { max-width: 1200px; padding: 72px 32px; }
+.sectionIntro h2, .sectionTitle, .howHeading h2 { font-size: 36px; line-height: 1.5; letter-spacing: 0; }
+.sectionIntro p, .howHeading p, .solutionCard p, .steps p, .faqs p { font-size: 16px; line-height: 1.9; }
+.solutions { gap: 20px; }
+.solutionCard { border-radius: 12px; padding: 28px; }
+.solutionCard h3 { font-size: 22px; }
+.solutionCard a { font-size: 16px; min-height: 44px; display: inline-flex; align-items: center; }
+.howSection { max-width: 1136px; margin: 0 auto; padding: 48px; gap: 56px; border-radius: 12px; }
+.steps h3 { font-size: 18px; }
+.faqs summary { font-size: 16px; min-height: 64px; gap: 16px; }
+.faqs summary svg { flex-shrink: 0; }
+.finalCta h2 { font-size: 38px; line-height: 1.5; letter-spacing: 0; }
+.footer { max-width: 1200px; margin: auto; padding: 32px; }
+.footer > div { font-size: 14px; flex-wrap: wrap; }
+.authHeader { max-width: 1200px; padding: 24px 32px; }
+.authHeader > a:last-child { font-size: 16px; }
+.authGrid { max-width: 1120px; gap: 48px; padding-top: 24px; }
+.authAside { min-height: 540px; padding: 36px; border-radius: 12px; }
+.authAside h1 { font-size: 36px; line-height: 1.5; margin: 20px 0; }
+.authAside p, .asidePoints li, .asideFoot { font-size: 16px; line-height: 1.8; }
+.formTitle { font-size: 30px; line-height: 1.5; }
+.formSubtitle { font-size: 16px; line-height: 1.8; margin-bottom: 24px; }
+.field > label, .input { font-size: 16px; }
+.input { min-height: 54px; padding: 12px 16px; }
+.roleOption b { font-size: 18px; }
+.roleOption { min-height: 96px; padding: 20px; }
+.progress { gap: 12px; margin-bottom: 28px; }
+.progress li { font-size: 15px; line-height: 1.5; }
+.progress span { width: 28px; height: 28px; }
+.loginRole .roleOption { min-height: 64px; padding: 12px; }
+.loginRole b { font-size: 16px; }
+.authSwitch { font-size: 16px; }
+.backButton { font-size: 16px; }
+.privacy p, .privacy li { font-size: 16px; }
+@media (max-width: 1100px) and (min-width: 801px) {
+ .headerInner { gap: 16px; flex-wrap: wrap; }
+ .nav { order: 3; width: 100%; justify-content: center; }
+ .hero { gap: 32px; }
+ .valueStrip, .howSection { margin-inline: 32px; }
+}
+@media (max-width: 800px) {
+ .headerInner { padding: 16px 24px; display: grid; grid-template-columns: 1fr auto; gap: 16px; }
+ .brand { justify-self: start; }
+ .menuToggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; min-height: 44px; padding: 8px 12px; font-size: 14px; font-weight: 700; background: var(--surface); color: var(--text); }
+ .headerActions { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 12px; }
+ .nav { display: none; grid-column: 1 / -1; grid-row: 3; padding-top: 8px; border-top: 1px solid var(--border); }
+ .navOpen { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+ .nav a { min-height: 48px; justify-content: space-between; }
+ .nav a svg { display: block; }
+ .hero { padding: 48px 24px; gap: 40px; grid-template-columns: 1fr; }
+ .heroCopy { max-width: 600px; }
+ .heroCopy h1 { font-size: 44px; line-height: 1.4; }
+ .heroDescription { font-size: 17px; }
+ .valueStrip { margin: 0 24px; padding: 24px 0; gap: 24px; }
+ .section { padding: 56px 24px; }
+ .sectionIntro h2, .sectionTitle, .howHeading h2 { font-size: 30px; }
+ .howSection { margin: 0 24px; padding: 32px; gap: 32px; }
+ .finalCta h2 { font-size: 30px; }
+ .authGrid { max-width: 620px; grid-template-columns: 1fr; gap: 32px; padding: 8px 24px 48px; }
+ .authAside { position: static; min-height: 0; padding: 24px; }
+ .authAside h1 { font-size: 28px; margin: 12px 0; }
+ .authAside h1 br { display: initial; }
+ .authAside p { font-size: 16px; line-height: 1.8; }
+ .authForm { padding-top: 0; }
+ .authHeader { padding: 20px 24px; }
+ .formTitle { font-size: 28px; }
+ .footer { padding: 32px 24px; }
+}
+@media (max-width: 480px) {
+ .headerInner { padding: 16px 20px; gap: 12px; }
+ .wordmark { width: 132px; }
+ .brand { gap: 9px; }
+ .brandMark { width: 40px; height: 40px; }
+ .brandMark svg { width: 33px; height: 33px; }
+ .headerLogin, .smallPrimary { padding: 10px 12px; font-size: 16px; }
+ .hero { padding: 36px 20px 40px; }
+ .heroCopy h1 { font-size: 38px; line-height: 1.45; margin: 20px 0; letter-spacing: 0; }
+ .heroDescription { font-size: 16px; line-height: 1.9; }
+ .ctaRow { gap: 12px; }
+ .ctaRow .primary, .ctaRow .secondary { flex: 1 1 100%; font-size: 16px; min-height: 52px; }
+ .heroNotes { font-size: 14px; gap: 10px; }
+ .visualTop { padding: 16px; font-size: 15px; gap: 8px; }
+ .visualMain { padding: 20px; }
+ .visualHeading h2 { font-size: 18px; }
+ .previewOrder { padding: 16px; }
+ .visualBottom { flex-direction: column; align-items: flex-start; }
+ .floatingNote { margin: 0 20px 20px; padding: 14px; }
+ .valueStrip { margin-inline: 20px; }
+ .section { padding: 48px 20px; }
+ .solutionCard { padding: 24px; }
+ .howSection { margin-inline: 20px; padding: 24px; }
+ .sectionIntro h2, .sectionTitle, .howHeading h2, .finalCta h2 { font-size: 28px; }
+ .authHeader { padding: 20px; gap: 16px; }
+ .authHeader > a:last-child { font-size: 14px; }
+ .authGrid { padding: 4px 20px 48px; gap: 28px; }
+ .authAside { padding: 24px; }
+ .authAside h1 { font-size: 26px; }
+ .progress { gap: 8px; }
+ .progress li { flex-direction: column; align-items: flex-start; gap: 8px; font-size: 14px; padding-bottom: 12px; }
+ .loginRole { grid-template-columns: 1fr; gap: 10px; }
+ .loginRole .roleOption { justify-content: flex-start; padding: 12px 16px; min-height: 56px; }
+ .loginRole .roleOption > div { flex: 1; }
+ .loginRole .radioCircle { display: grid; flex-shrink: 0; }
+ .loginRole svg { width: 20px; height: 20px; }
+ .loginRole b { font-size: 16px; }
+ .roleOption { padding: 16px; gap: 12px; }
+ .roleOption b { font-size: 17px; }
+ .roleOption small { display: block; line-height: 1.7; }
+ .footer { padding: 28px 20px; gap: 24px; }
+ .finalCta { padding: 48px 20px; }
+}
+@media (max-width: 360px) {
+ .wordmark { width: 119px; }
+ .brandMark { width: 36px; height: 36px; }
+ .menuToggle { padding-inline: 10px; gap: 6px; }
+ .headerInner { padding-inline: 16px; }
+ .heroCopy h1 { font-size: 34px; }
+ .visualMain { padding: 16px; }
+ .visualHeading { gap: 8px; }
+ .visualHeading h2 { font-size: 17px; }
+ .visualTop { flex-wrap: wrap; }
+}

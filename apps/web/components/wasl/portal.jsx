@@ -8181,7 +8181,7 @@ function Gm({ cur: e, go: a, store: t, initialRef = "" }) {
 `),
 				M = document.createElement("a");
 			((M.href = URL.createObjectURL(new Blob([_], { type: "text/csv" }))),
-				(M.download = "superx-orders.csv"),
+				(M.download = "share-fast-orders.csv"),
 				M.click(),
 				o("تم تنزيل ملف الطلبات (" + Pu.length + " طلب)"));
 		};
@@ -11775,17 +11775,16 @@ function Vm({ store: e }) {
 						className: "notch",
 						children: (0, p.jsx)("i", {}),
 					}),
-					(0, p.jsx)("div", {
-						style: {
-							textAlign: "center",
-							fontSize: 10,
-							fontWeight: 800,
-							letterSpacing: 2,
-							color: "var(--mut)",
-							paddingTop: 2,
-						},
-						children: "SUPER X",
-					}),
+                    (0, p.jsxs)("div", {
+                        className: "courier-brand",
+                        children: [
+                            (0, p.jsxs)("span", { className: "courier-brand-lockup", dir: "ltr", "aria-label": "SHARE FAST", children: [
+                                (0, p.jsx)(ShareFastMark, { size: 32 }),
+                                (0, p.jsx)(ShareFastWordmark, { className: "courier-wordmark" }),
+                            ] }),
+                            (0, p.jsx)("span", { children: "واجهة المندوب" }),
+                        ],
+                    }),
 					(0, p.jsx)("div", {
 						className: "app-head",
 						children: (0, p.jsxs)("div", {

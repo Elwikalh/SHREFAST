@@ -15,7 +15,7 @@ import {
 	ShieldCheck,
 	Store,
 } from "lucide-react";
-import { Brand } from "./landing";
+import { Brand } from "./brand";
 import {
 	governorates,
 	registrationSchema,
@@ -312,50 +312,49 @@ export default function AuthForm({
 			</header>
 			<main className={styles.authGrid}>
 				<aside className={styles.authAside}>
-					<span className={styles.eyebrow}>بداية مرتبة لشغلك</span>
+					<span className={styles.eyebrow}>حسابك على SHARE FAST</span>
 					<h1>
 						{registering ? (
 							<>
-								حساب واحد.
-								<br />
-								مساحتك أنت.
+								ابدأ حسابك.
+								<br />{" "}
+								نظّم توصيلك.
 							</>
 						) : (
 							<>
 								أهلًا بعودتك.
-								<br />
-								شغلك في مكانه.
+								<br />{" "}
+								تابع عملك بسهولة.
 							</>
 						)}
 					</h1>
 					<p>
 						{registering
-							? "اختر دورك، أضف بياناتك، وأنشئ كلمة مرور. ندخلك بعدها إلى البوابة المناسبة لحسابك."
-							: "سجّل الدخول بنفس نوع الحساب الذي أنشأته. بيانات التشغيل لا تفتح بمجرد معرفة رابط أو مرجع حساب."}
+							? "سجّل بياناتك في ثلاث خطوات، ثم انتقل إلى لوحة الحساب المناسبة لعملك."
+							: "اختر نوع حسابك، واستخدم رقم الموبايل وكلمة المرور للوصول إلى لوحة عملك."}
 					</p>
 					<ul className={styles.asidePoints}>
 						<li>
-							<Check size={18} /> خطوات واضحة، بدون بيانات زائدة
+							<Check size={18} /> بيانات مناسبة لنوع حسابك
 						</li>
 						<li>
 							<Check size={18} /> تجربة عربية على الموبايل والكمبيوتر
 						</li>
 						<li>
-							<Check size={18} /> كلمة المرور لا تحفظ في المتصفح
+							<Check size={18} /> كلمة مرور خاصة بحسابك
 						</li>
 					</ul>
 					<div className={styles.asideFoot}>
 						<ShieldCheck size={19} />
 						<span>
-							هذا النموذج ينشئ حسابًا. تفعيل التغطية واتفاقات التوصيل يحتاج
-							تحققًا وإعدادًا منفصلًا.
+							إنشاء الحساب لا يفعّل التوصيل تلقائيًا. التغطية واتفاقات التوصيل تحتاج إلى إعداد وتحقق منفصل.
 						</span>
 					</div>
 				</aside>
 				<div className={styles.authForm}>
 					{registering && (
 						<ol className={styles.progress} aria-label="مراحل التسجيل">
-							{["نوع الحساب", "بياناتك", "تأمين الدخول"].map((label, i) => (
+							{["نوع الحساب", "البيانات", "كلمة المرور"].map((label, i) => (
 								<li
 									key={label}
 									className={i === step ? styles.current : undefined}
@@ -370,18 +369,18 @@ export default function AuthForm({
 					<h2 ref={titleRef} tabIndex={-1} className={styles.formTitle}>
 						{registering
 							? [
-									"نوع حسابك إيه؟",
-									"خلينا نعرف شغلك.",
-									"آخر خطوة. دخولك الآمن.",
+									"اختر نوع حسابك",
+									"أضف بيانات العمل",
+									"أمّن حسابك",
 								][step]
 							: "تسجيل الدخول"}
 					</h2>
 					<p className={styles.formSubtitle}>
 						{registering
 							? [
-									"كل دور له بوابة وبيانات مناسبة. اختار اللي يناسبك.",
-									`بيانات ${roleName} تساعدنا نجهز مساحة حسابك.`,
-									"رقمك هو اسم الدخول. لا نعتبره موثّق الملكية لمجرد التسجيل.",
+									"اختر الدور الذي يناسب عملك. يمكنك تسجيل نشاط، شركة توصيل، أو حساب مندوب.",
+									`أكمل بيانات ${roleName} لتجهيز لوحة حسابك.`,
+									"استخدم رقم الموبايل للدخول. إنشاء الحساب لا يعني توثيق ملكية الرقم.",
 								][step]
 							: "اختر نوع حسابك وأدخل رقم الموبايل وكلمة المرور."}
 					</p>
@@ -591,7 +590,7 @@ export default function AuthForm({
 							</button>
 						</div>
 						<p className={styles.authSwitch}>
-							{registering ? "عندك حساب بالفعل؟" : "أول مرة هنا؟"}
+							{registering ? "لديك حساب بالفعل؟" : "ليس لديك حساب؟"}
 							<Link
 								href={`${registering ? "/login" : "/register"}?role=${role === "admin" ? "merchant" : role}`}
 							>

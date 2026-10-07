@@ -56,7 +56,7 @@ test("landing is RTL, responsive, with Lucide and real registration links", asyn
 	page.on("pageerror", (e) => errors.push(e.message));
 	await page.goto("/");
 	await expect(page.getByRole("heading", { level: 1 })).toContainText("كل طلب");
-	await expect(page.locator("svg.lucide").first()).toBeVisible();
+	await expect(page.locator("main svg.lucide").first()).toBeVisible();
 	await expect(page.getByText("معاينة توضيحية", { exact: true })).toBeVisible();
 	expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
 	expect(
@@ -242,7 +242,7 @@ for (const role of ["company", "courier", "admin"]) {
 		await expect(
 			page.getByText("حدث خطأ غير متوقع في هذه الشاشة", { exact: true }),
 		).toHaveCount(0);
-		await expect(page.locator("svg.lucide").first()).toBeVisible();
+		await expect(page.locator("main svg.lucide").first()).toBeVisible();
 		await page.waitForTimeout(500);
 		expect(errors).toEqual([]);
 	});
@@ -259,4 +259,24 @@ test("SHARE FAST identity, mark and favicon are consistent on public pages", asy
  }
  const favicon=await request.get("/icon.svg");expect(favicon.status()).toBe(200);expect(favicon.headers()["content-type"]).toContain("image/svg+xml");
  const logo=await request.get("/brand/share-fast-logo.svg");expect(logo.status()).toBe(200);expect(await logo.text()).toContain("SHARE FAST");
+});
+
+
+test("header is readable and compact navigation supports keyboard closing", async ({ page }) => {
+ await page.goto("/");
+ const button = page.locator("header button[aria-controls=site-navigation]");
+ if ((page.viewportSize()?.width || 1440) <= 800) {
+  await button.click();
+  await expect(button).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByRole("link", { name: "خطوات التسجيل", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(button).toHaveAttribute("aria-expanded", "false");
+  await expect(button).toBeFocused();
+ }
+ for (const label of ["تسجيل الدخول", "حساب جديد"]) {
+  const link = page.locator("header").getByRole("link", { name: label, exact: true });
+  await expect(link).toBeVisible();
+  expect(await link.evaluate(e => parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(16);
+  expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+ }
 });

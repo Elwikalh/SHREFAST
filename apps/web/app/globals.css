@@ -1918,3 +1918,97 @@ textarea {
 .portal-wordmark{width:142px;height:auto;display:block;color:#fff;--accent:#79d7bc;overflow:visible}
 .brand b:has(.portal-wordmark){display:block;line-height:1}
 .brand b:has(.portal-wordmark)+small{margin-top:6px;font-size:14px;line-height:1.45;color:#9dadc6}
+
+/* Readable operating portals: explicit labels, restrained surfaces, comfortable controls. */
+body { font-size: 16px; line-height: 1.7; letter-spacing: 0; }
+:root { --bg: #f7f9fa; --mut: #52636b; --line: #dce5e8; --r: 12px; --r2: 8px; --sh: 0 1px 3px rgba(10,15,30,.04); }
+.main { padding: 28px 32px 48px; }
+.side { background: #102b30; }
+.side:before { display: none; }
+.side .navlab { color: #b4c7cb; font-size: 14px; letter-spacing: 0; padding-top: 20px; }
+.side .nav { font-size: 16px; min-height: 48px; color: #d4e2e5; gap: 12px; }
+.side .nav.on { background: #24494d; color: #99edda; }
+.side .brand small { font-size: 14px; color: #b4c7cb; margin-top: 6px; }
+.side .foot b { font-size: 16px; }
+.side .foot p { font-size: 14px; color: #c0d2d5; }
+.topbar { gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.topbar > div:first-child { min-width: 0; }
+.topbar h1 { font-size: 28px; line-height: 1.5; letter-spacing: 0; }
+.topbar .sub { font-size: 16px; margin-top: 4px; line-height: 1.7; }
+.topbar .btn { min-height: 44px; font-size: 15px; }
+.iconbtn, .avatar { width: 44px; height: 44px; border-radius: 10px; }
+.btn, .btn-sm { min-height: 44px; font-size: 15px; border-radius: 8px; }
+.btn-p { background: #067567; box-shadow: none; }
+.card { box-shadow: 0 1px 3px rgba(10,15,30,.04); }
+.card .hd { padding: 20px; flex-wrap: wrap; }
+.card .hd h3 { font-size: 18px; line-height: 1.6; }
+.stat .v { font-size: 30px; }
+.stat .l { font-size: 16px; }
+.stat .trend { font-size: 14px; }
+.tbl { font-size: 15px; }
+.tbl .sub { font-size: 14px; }
+.field .inp { font-size: 16px; min-height: 48px; }
+.account-session-bar { padding: 16px 32px; gap: 16px; font-size: 16px; }
+.account-session-bar > span { gap: 8px 16px; }
+.account-session-bar small { font-size: 14px; color: #52636b; background: #f0f4f5; padding: 4px 10px; border-radius: 6px; }
+.account-session-bar button { font-size: 15px; font-weight: 700; border: 1px solid #dce5e8; border-radius: 8px; padding: 8px 14px; color: #067567; white-space: nowrap; }
+.portal-review-notice { padding: 14px 32px; font-size: 14px; line-height: 1.9; }
+@media (max-width: 1120px) and (min-width: 761px) {
+ .shell { grid-template-columns: 220px minmax(0, 1fr); }
+ .side { padding: 20px 12px; }
+ .side .brand { justify-content: flex-start; }
+ .side .brand b, .side .brand small { display: block; }
+ .portal-wordmark { width: 126px; }
+ .side .nav { justify-content: flex-start; padding: 12px; }
+ .side .nav > span:not(.pip) { display: inline; }
+ .side .navlab { text-align: right; padding-inline: 12px; }
+ .side .nav .pip { position: static; margin-inline-start: auto; font-size: 12px; }
+ .main { padding: 24px; }
+}
+@media (max-width: 760px) {
+ .main { padding: 24px 20px 40px; }
+ .side { padding: 12px; gap: 8px; scroll-padding-inline: 12px; }
+ .side .brand { display: none; }
+ .side .nav { min-height: 48px; padding: 10px 14px; font-size: 15px; gap: 8px; justify-content: flex-start; }
+ .side .nav > span:not(.pip) { display: inline; }
+ .side .nav .pip { margin-inline-start: 4px; font-size: 12px; }
+ .topbar { gap: 12px; padding-bottom: 16px; }
+ .topbar > div:first-child { flex-basis: 100%; }
+ .topbar h1 { font-size: 26px; }
+ .topbar .sub { font-size: 15px; }
+ .topbar .sp { display: none; }
+ .topbar .avatar { margin-inline-start: auto; }
+ .topbar .btn { padding-inline: 14px; font-size: 14px; }
+ .account-session-bar { padding: 16px 20px; align-items: flex-start; flex-wrap: wrap; }
+ .account-session-bar > span { flex: 1; min-width: 150px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+ .account-session-bar button { font-size: 14px; padding-inline: 12px; }
+ .portal-review-notice { padding: 12px 20px; }
+ .card .hd h3 { font-size: 17px; }
+ .card .hd, .card .bd { padding: 18px; }
+}
+
+/* Courier uses a real responsive app surface rather than a decorative phone frame. */
+.phone-wrap { padding: 24px; }
+.phone { width: 440px; max-width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 0; background: var(--card); box-shadow: var(--sh); }
+.phone .notch { display: none; }
+.phone .scr { border-radius: 11px; height: min(820px, calc(100dvh - 140px)); min-height: 580px; background: var(--bg); }
+.app-head { padding: 24px; background: #067567; }
+.app-head:before { display: none; }
+.app-body { padding: 20px; }
+.app-tabbar { padding: 12px 8px max(12px, env(safe-area-inset-bottom)); background: #fff; }
+.app-tabbar button { min-height: 56px; font-size: 14px; color: #52636b; }
+.app-tabbar button.on { color: #067567; }
+.bigcard { border-radius: 12px; }
+.cobar .sub { font-size: 14px !important; line-height: 1.7; }
+.cobar b { font-size: 16px !important; }
+@media (max-width: 760px) {
+ .phone-wrap { padding: 0; }
+ .phone { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+ .phone .scr { border-radius: 0; height: calc(100dvh - 100px); min-height: 600px; }
+ .app-head { padding: 24px 20px; }
+}
+
+.courier-brand { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; background: #fff; color: #14282b; font-size: 14px; border-bottom: 1px solid var(--line); }
+.courier-brand-lockup { display: flex; align-items: center; gap: 8px; color: #067567; }
+.courier-wordmark { display: block; width: 132px; height: auto; color: #14282b; --accent: #067567; }
+@media(max-width:360px){.courier-brand{padding-inline:16px;gap:10px}.courier-wordmark{width:110px}}
