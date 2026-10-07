@@ -7,7 +7,7 @@ import { ArrowLeft, Bike, Building2, Check, Download, Monitor, ShieldCheck, Smar
 import { Brand } from "./brand";
 import { useInstall } from "./install-provider";
 import styles from "./site.module.css";
-const roles=[{id:"courier",label:"مندوب توصيل",hint:"ثبّت التطبيق على الموبايل، أنشئ حسابك وتابع الطلبات المسندة إليك.",icon:Bike}, {id:"merchant",label:"مطعم أو نشاط تجاري",hint:"لوحة طلباتك على الكمبيوتر أو الموبايل، بنفس بيانات الحساب.",icon:Store},{id:"company",label:"شركة توصيل",hint:"افتح لوحة الشركة من سطح المكتب، ونظّم العملاء والمناديب.",icon:Building2}] as const;
+const roles=[{id:"courier",label:"مندوب توصيل",hint:"ثبّت التطبيق على الموبايل، أنشئ حسابك وتابع الطلبات المسندة إليك.",icon:Bike}, {id:"merchant",label:"مطعم أو نشاط تجاري",hint:"ثبّت تطبيق المطعم أو النشاط على الموبايل أو الكمبيوتر، وافتح نفس لوحة الطلبات.",icon:Store},{id:"company",label:"شركة توصيل",hint:"ثبّت تطبيق شركة التوصيل على الموبايل أو الكمبيوتر، بنفس الحساب ونفس البيانات.",icon:Building2}] as const;
 export default function InstallApp({initialRole="courier",autoOpen=false}:{initialRole?:"courier"|"merchant"|"company";autoOpen?:boolean}) {
  const [role,setRole]=useState(initialRole);const {installed,available,installing,install}=useInstall();
  const [signedIn,setSignedIn]=useState(false);const router=useRouter();
@@ -28,7 +28,7 @@ export default function InstallApp({initialRole="courier",autoOpen=false}:{initi
    <div className={styles.installGrid}>
     <section className={styles.installSurface} aria-labelledby="app-role-title"><h2 id="app-role-title">اختر طريقة استخدامك</h2><div className={styles.installRoles}>
      {roles.map(({id,label,hint,icon:Icon})=><button key={id} type="button" aria-pressed={role===id} onClick={()=>setRole(id)} className={role===id?styles.installSelected:undefined}><Icon size={24}/><span><b>{label}</b><small>{hint}</small></span>{role===id&&<Check size={20}/>}</button>)}
-    </div><div className={styles.installActions}>
+    </div><p className={styles.fieldNote}><b>{role === "courier" ? "للمندوب: ثبّت التطبيق على الموبايل وتابع طلباتك من داخله." : "تطبيق المطعم وشركة التوصيل متاح للموبايل والكمبيوتر. ثبّته على أيٍّ منهما، واستخدم نفس الحساب ونفس البيانات."}</b></p><div className={styles.installActions}>
      {installed?<p role="status" className={styles.installSuccess}><Check size={20}/> التطبيق جاهز على جهازك</p>:available?<button type="button" className={styles.primary} disabled={installing} onClick={install}><Download size={20}/>{installing?"جارٍ فتح التثبيت…":"تثبيت التطبيق"}</button>:<a className={styles.primary} href="#install-help"><Download size={20}/> طريقة تثبيت التطبيق</a>}
      {signedIn ? <Link className={styles.secondary} href="/wasl">فتح لوحة التحكم<ArrowLeft size={18}/></Link> : <Link className={styles.secondary} href={`/register?role=${role}&app=1`}>{role==="courier"?"إنشاء حساب المندوب":"إنشاء حساب جديد"}<ArrowLeft size={18}/></Link>}
      {!signedIn && <Link className={styles.installLogin} href={`/login?role=${role}`}>لديك حساب؟ تسجيل الدخول</Link>}

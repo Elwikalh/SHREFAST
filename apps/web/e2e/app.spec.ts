@@ -10,7 +10,7 @@ test("install page offers all roles, real instructions, and only prompts after a
  await page.getByRole("button",{name:"تثبيت التطبيق",exact:true}).click();
  await expect(page.getByText("التطبيق جاهز على جهازك",{exact:true})).toBeVisible();
  expect(await page.evaluate(()=>(window as unknown as {promptCalled:boolean}).promptCalled)).toBe(true);
- await page.getByRole("button",{name:/مطعم أو نشاط تجاري/}).click();await expect(page.getByRole("link",{name:"إنشاء حساب جديد",exact:true})).toHaveAttribute("href","/register?role=merchant&app=1");
+ await page.getByRole("button",{name:/مطعم أو نشاط تجاري/}).click();await expect(page.getByText("تطبيق المطعم وشركة التوصيل متاح للموبايل والكمبيوتر.",{exact:false})).toBeVisible();await expect(page.getByRole("link",{name:"إنشاء حساب جديد",exact:true})).toHaveAttribute("href","/register?role=merchant&app=1");
  await page.getByRole("button",{name:/شركة توصيل/}).click();await expect(page.getByRole("link",{name:"إنشاء حساب جديد",exact:true})).toHaveAttribute("href","/register?role=company&app=1");
 });
 test("service worker never caches account APIs or private navigation HTML",async({page})=>{
