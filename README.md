@@ -1,26 +1,37 @@
-# الحَبّوب — El7bboB Platform
+# Super X — SHREFAST
 
-منصة طلبات وإدارة كاملة لمطعم الحَبّوب وعرباته الخارجية: موقع طلب، شاشة أرقام، شاشة مطبخ (KDS)، كاشير، وداشبورد أدمن — كل حاجة TypeScript من غير أي حاجة قديمة.
+منصة إدارة التوصيل: بوابة نشاط تجاري، شركات توصيل، مناديب ولوحة إدارة، مع حزم المونوريبو الأصلية المشتركة.
+
+> قبل تشغيل بيانات حقيقية، راجع [التحديث التقني ونقاط الأمان المتبقية](docs/REVIEW.md). بعض مسارات المنصة القديمة ما زالت تحتاج مصادقة وصلاحيات وعزل بيانات؛ التحديث لا يعالجها بالكامل.
+
+## المنصة الحالية
+
+- `apps/web/app/wasl` — الواجهة داخل Next.js؛ `/` يعرض المنصة و`/wasl/index.html` يحوّل للعنوان الجديد.
+- `apps/web/components/wasl` — مصدر البوابات المستعاد والأيقونات من Lucide.
+- `apps/web/lib` و`apps/web/app/api/wasl` — الاتصال، التحقق والتخزين وواجهات المنصة.
+- `docs/REVIEW.md` — نطاق التغييرات وخطة العمل الأمنية التالية.
 
 ## البنية
 
 هذا مونوريبو (pnpm workspaces + Turborepo):
 
-- `apps/web` — موقع Next.js 16 (الموقع + الـAPI + الداشبورد لاحقًا)
+- `apps/web` — موقع Next.js 16 (منصة Super X + الـAPI)
 - `packages/core` — منطق مشترك: التسعير، هامش الربح، ترقيم الأوردرات (بدون أي اعتماد على قاعدة بيانات)
 - `packages/db` — سكيما Drizzle + PostgreSQL + بذور المينيو (seed)
 
 ## المتطلبات
 
 - Node.js 22+ (راجع `.nvmrc`)
-- pnpm 9+ (`corepack enable`)
+- pnpm 10 (الإصدار مثبت في packageManager) (`corepack enable`)
 - PostgreSQL 17 (محلي أو Railway)
 
 ## التشغيل محليًا
 
 ```bash
 cp .env.example .env
-pnpm install
+# عدل DATABASE_URL وباقي القيم، ثم حمّل البيئة في الطرفية للحزم كلها:
+set -a; . ./.env; set +a
+pnpm install --frozen-lockfile
 pnpm --filter @el7bboB/db db:generate
 pnpm --filter @el7bboB/db db:migrate
 pnpm --filter @el7bboB/db db:seed
@@ -29,7 +40,16 @@ pnpm dev
 
 الموقع هيشتغل على `http://localhost:3000`.
 
-ملحوظة: أول ما تشغّل `pnpm install` هيتولد `pnpm-lock.yaml` — لازم يتعمله كوميت عشان الـCI والديبلوي يبقوا أسرع وثابتين (frozen lockfile).
+### اختبارات الجودة
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm --filter @el7bboB/web exec playwright install chromium
+pnpm --filter @el7bboB/web test:e2e
+```
 
 ## الديبلوي على Railway (Staging)
 

@@ -6,9 +6,7 @@ WORKDIR /app
 
 FROM base AS builder
 COPY . .
-# No pnpm-lock.yaml is committed yet, so this stays reproducible-but-not-frozen
-# until the first local `pnpm install` generates and commits the lockfile.
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @el7bboB/web... build
 
 FROM base AS runner

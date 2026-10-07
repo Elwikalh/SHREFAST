@@ -2,8 +2,10 @@
 	"name": "el7bboB",
 	"private": true,
 	"version": "0.1.0",
-	"packageManager": "pnpm@9.15.0",
-	"engines": { "node": ">=22.0.0" },
+	"packageManager": "pnpm@10.34.6",
+	"engines": {
+		"node": ">=22.0.0"
+	},
 	"scripts": {
 		"dev": "turbo run dev",
 		"build": "turbo run build",
@@ -12,10 +14,16 @@
 		"typecheck": "turbo run typecheck",
 		"db:generate": "pnpm --filter @el7bboB/db db:generate",
 		"db:migrate": "pnpm --filter @el7bboB/db db:migrate",
-		"db:seed": "pnpm --filter @el7bboB/db db:seed"
+		"db:seed": "pnpm --filter @el7bboB/db db:seed",
+		"test": "turbo run test"
 	},
 	"devDependencies": {
-		"turbo": "^2.3.3",
-		"typescript": "^5.7.3"
+		"turbo": "2.11.7",
+		"typescript": "6.0.3"
+	},
+	"pnpm": {
+		"overrides": {
+			"@esbuild-kit/core-utils>esbuild": "0.28.2"
+		}
 	}
 }

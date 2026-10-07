@@ -1,7 +1,4 @@
-import { redirect } from "next/navigation"
-
-// المنصة كلها تعيش على /wasl/index.html كملف ثابت —
-// الرابط الرئيسي يحوّل مباشرة عليها.
+import WaslClient from "@/components/wasl/client";
 export default function Home() {
-	redirect("/wasl/index.html")
+	return <WaslClient />;
 }
