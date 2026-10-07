@@ -198,7 +198,7 @@ export default function Landing() {
 								icon: Bike,
 								title: "للمندوب",
 								text: "حساب مستقل للمتابعة. انضم لفريق بدعوة، واعرف الطلبات المسندة إليك وخطوتك التالية.",
-								label: "انضم كمندوب",
+								label: "حمّل تطبيق المندوب",
 							},
 						].map(({ role, icon: Icon, title, text, label }) => (
 							<article key={role} className={styles.solutionCard}>
@@ -207,7 +207,7 @@ export default function Landing() {
 								</span>
 								<h3>{title}</h3>
 								<p>{text}</p>
-								<Link href={`/register?role=${role}`}>
+								<Link href={role === "courier" ? "/app?role=courier" : `/register?role=${role}`}>
 									{label}
 									<ArrowLeft size={17} />
 								</Link>
@@ -238,7 +238,7 @@ export default function Landing() {
 							},
 							{
 								title: "أضف بيانات العمل",
-								text: "أضف الاسم، والمحافظة، والمنطقة والعنوان. للشركات، حدد مناطق التغطية أيضًا.",
+								text: "أضف الاسم، والمحافظة، والمنطقة والعنوان. للشركات، يمكن إضافة نطاق التغطية لاحقًا.",
 							},
 							{
 								title: "أمّن حسابك",
@@ -313,7 +313,8 @@ export default function Landing() {
 				<Brand />
 				<p>إدارة أوضح لطلباتك وفريقك.</p>
 				<div>
-					<Link href="/privacy">بيانات التسجيل</Link>
+					<Link href="/app">تثبيت التطبيق</Link>
+                    <Link href="/privacy">بيانات التسجيل</Link>
 					<Link href="/login">تسجيل الدخول</Link>
 					<span dir="ltr">© {new Date().getFullYear()} SHARE FAST</span>
 				</div>

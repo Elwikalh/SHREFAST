@@ -421,3 +421,23 @@ it("canonicalizes international phone numbers in courier invitations", async () 
 	expect(result.courier.phone).toBe("01000000003");
 	expect(result.courier.ownerName).toBe(profile.name);
 });
+
+
+describe("minimal registration persists across fresh login sessions", () => {
+ for (const role of ["merchant", "company", "courier"] as const) {
+  it(`persists ${role} account and profile without browser storage`, async()=>{
+   const phone = role === "merchant" ? "01000000101" : role === "company" ? "01000000102" : "01000000103";
+   const a=await account({role,phone,address:role==="merchant"?"عنوان الاستلام":"",coverage:[],nationalId:undefined});
+   await logout(req("auth/logout",{},a.cookie));
+   expect((await me(req("auth/me",undefined,a.cookie))).status).toBe(401);
+   const response=await login(req("auth/login",{role,phone:"+20"+phone.slice(1),password:profile.password}));
+   expect(response.status).toBe(200);
+   const again=await (await me(req("auth/me",undefined,cookie(response)))).json();
+   expect(again.user.id).toBe(a.user.id);expect(again.user.name).toBe(profile.name);expect(again.user.phone).toBe(phone);
+   expect(again.user.phoneVerified).toBe(false);
+   const table=role==="courier"?"wasl_courier_accounts":"wasl_entities";
+   const saved=await database.query(`SELECT name,phone,zone,address FROM ${table} WHERE ref=$1`,[a.user.ref]);
+   expect(saved.rows[0]).toMatchObject({name:profile.name,phone,zone:profile.zone,address:role==="merchant"?"عنوان الاستلام":""});
+  });
+ }
+});

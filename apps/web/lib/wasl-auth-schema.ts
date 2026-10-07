@@ -30,7 +30,7 @@ export const registrationSchema = z
 		password: z.string().min(10, "كلمة المرور 10 أحرف على الأقل").max(128),
 		governorate: field("المحافظة", 80),
 		zone: field("المنطقة", 100),
-		address: field("العنوان", 500),
+		address: z.string().trim().max(500).default(""),
 		businessType: z.string().trim().max(80).optional(),
 		coverage: z.array(z.string().trim().min(2).max(100)).max(30).default([]),
 		vehicle: z.enum(["moto", "bike", "car"]).default("moto"),
@@ -43,18 +43,9 @@ export const registrationSchema = z
 		}),
 	})
 	.superRefine((data, ctx) => {
-		if (data.role === "company" && !data.coverage.length)
-			ctx.addIssue({
-				code: "custom",
-				path: ["coverage"],
-				message: "أضف منطقة واحدة على الأقل لنطاق التغطية",
-			});
-		if (data.role === "courier" && !data.nationalId)
-			ctx.addIssue({
-				code: "custom",
-				path: ["nationalId"],
-				message: "أدخل الرقم القومي من 14 رقمًا",
-			});
+        if (data.role === "merchant" && data.address.length < 2)
+            ctx.addIssue({ code: "custom", path: ["address"], message: "أدخل عنوان استلام الطلبات" });
+
 	});
 export const loginSchema = z.object({
 	role: z.enum([...accountRoles, "admin"]),

@@ -75,14 +75,16 @@ type Fields = {
 export default function AuthForm({
 	mode,
 	initialRole = "merchant",
+	skipRoleSelection = false,
 }: {
 	mode: "register" | "login";
 	initialRole?: AccountRole | "admin";
+	skipRoleSelection?: boolean;
 }) {
 	const router = useRouter();
 	const registering = mode === "register",
 		[role, setRole] = useState(initialRole),
-		[step, setStep] = useState(0),
+		[step, setStep] = useState(skipRoleSelection ? 1 : 0),
 		[busy, setBusy] = useState(false),
 		[showPassword, setShowPassword] = useState(false),
 		[error, setError] = useState(""),
@@ -128,9 +130,9 @@ export default function AuthForm({
 			.filter(Boolean),
 		nationalId:
 			role === "courier"
-				? fields.nationalId.replace(/[٠-٩]/g, (x) =>
+				? fields.nationalId ? fields.nationalId.replace(/[٠-٩]/g, (x) =>
 						String("٠١٢٣٤٥٦٧٨٩".indexOf(x)),
-					)
+					) : undefined
 				: undefined,
 	});
 	async function submit(event: FormEvent) {
@@ -138,6 +140,7 @@ export default function AuthForm({
 		if (submitLock.current) return;
 		if (registering) {
 			if (step === 0) {
+                if (role === "courier") { router.push("/app?role=courier"); return; }
 				move(1);
 				return;
 			}
@@ -150,26 +153,6 @@ export default function AuthForm({
 							x.message,
 						]),
 					);
-			if (step === 1) {
-				const detailKeys = [
-					"name",
-					"governorate",
-					"zone",
-					"address",
-					"coverage",
-					"nationalId",
-				];
-				const detailErrors = Object.fromEntries(
-					Object.entries(issues).filter(([key]) => detailKeys.includes(key)),
-				);
-				if (Object.keys(detailErrors).length) {
-					setErrors(detailErrors);
-					setError("راجع البيانات المعلّمة أدناه.");
-					return;
-				}
-				move(2);
-				return;
-			}
 			if (fields.password !== fields.confirmPassword)
 				issues.confirmPassword = "كلمتا المرور غير متطابقتين";
 			if (Object.keys(issues).length) {
@@ -303,7 +286,7 @@ export default function AuthForm({
 		</div>
 	);
 	return (
-		<div className={styles.site}>
+		<div className={`${styles.site} ${registering ? styles.registerPage : ""}`}>
 			<header className={styles.authHeader}>
 				<Brand />
 				<Link href="/">
@@ -330,7 +313,7 @@ export default function AuthForm({
 					</h1>
 					<p>
 						{registering
-							? "سجّل بياناتك في ثلاث خطوات، ثم انتقل إلى لوحة الحساب المناسبة لعملك."
+							? "أضف بياناتك الأساسية ورقم الموبايل وكلمة المرور. بياناتك تُحفظ في حسابك وتظهر عند دخولك من أي جهاز."
 							: "اختر نوع حسابك، واستخدم رقم الموبايل وكلمة المرور للوصول إلى لوحة عملك."}
 					</p>
 					<ul className={styles.asidePoints}>
@@ -352,9 +335,9 @@ export default function AuthForm({
 					</div>
 				</aside>
 				<div className={styles.authForm}>
-					{registering && (
+					{registering && !skipRoleSelection && (
 						<ol className={styles.progress} aria-label="مراحل التسجيل">
-							{["نوع الحساب", "البيانات", "كلمة المرور"].map((label, i) => (
+							{["نوع الحساب", "بيانات الحساب"].map((label, i) => (
 								<li
 									key={label}
 									className={i === step ? styles.current : undefined}
@@ -370,8 +353,7 @@ export default function AuthForm({
 						{registering
 							? [
 									"اختر نوع حسابك",
-									"أضف بيانات العمل",
-									"أمّن حسابك",
+									"إنشاء حسابك",
 								][step]
 							: "تسجيل الدخول"}
 					</h2>
@@ -379,8 +361,7 @@ export default function AuthForm({
 						{registering
 							? [
 									"اختر الدور الذي يناسب عملك. يمكنك تسجيل نشاط، شركة توصيل، أو حساب مندوب.",
-									`أكمل بيانات ${roleName} لتجهيز لوحة حسابك.`,
-									"استخدم رقم الموبايل للدخول. إنشاء الحساب لا يعني توثيق ملكية الرقم.",
+									`أكمل البيانات الأساسية لحساب ${roleName}. يمكن إعداد تفاصيل التشغيل بعد التسجيل.`,
 								][step]
 							: "اختر نوع حسابك وأدخل رقم الموبايل وكلمة المرور."}
 					</p>
@@ -432,7 +413,7 @@ export default function AuthForm({
 							<>
 								{input(
 									"name",
-									role === "courier" ? "الاسم الكامل" : "اسم النشاط أو الشركة",
+									role === "courier" ? "الاسم الكامل" : role === "company" ? "اسم شركة التوصيل" : "اسم المطعم أو النشاط",
 									{
 										autocomplete: role === "courier" ? "name" : "organization",
 										placeholder:
@@ -477,21 +458,14 @@ export default function AuthForm({
 										autocomplete: "address-level2",
 									})}
 								</div>
-								{input(
-									"address",
-									role === "courier"
-										? "عنوان التواصل"
-										: "عنوان النشاط أو المقر",
-									{
-										placeholder: "الشارع، رقم المبنى، وعلامة مميزة",
-										autocomplete: "street-address",
-									},
-								)}
-								{role === "company" &&
-									input("coverage", "نطاق التغطية", {
-										placeholder: "المعادي، المقطم، مدينة نصر",
-										hint: "افصل بين المناطق بفاصلة. التسجيل لا يؤكد تفعيل التغطية.",
-									})}{" "}
+                                {role === "merchant" ? input("address", "عنوان النشاط أو المقر", { placeholder: "عنوان استلام الطلبات: الشارع ورقم المبنى", autocomplete: "street-address" }) : (
+                                    <details className={styles.optionalDetails}>
+                                        <summary>تفاصيل إضافية (اختياري)</summary>
+                                        <p className={styles.fieldNote}>يمكنك إنشاء الحساب بدون هذه البيانات، وإعداد تفاصيل التشغيل لاحقًا.</p>
+                                        {input("address", role === "courier" ? "عنوان التواصل (اختياري)" : "عنوان المقر (اختياري)", { placeholder: "الشارع ورقم المبنى", autocomplete: "street-address" })}
+                                        {role === "company" && input("coverage", "نطاق التغطية (اختياري)", { placeholder: "المعادي، المقطم، مدينة نصر", hint: "افصل المناطق بفاصلة. إضافة المنطقة لا تؤكد تفعيل التوصيل." })}
+                                    </details>
+                                )}
 								{role === "courier" && (
 									<>
 										<div className={styles.field}>
@@ -509,21 +483,18 @@ export default function AuthForm({
 												<option value="car">سيارة</option>
 											</select>
 										</div>
-										{input("nationalId", "الرقم القومي", {
-											inputMode: "numeric",
-											hint: "14 رقمًا. لا يظهر هذا الحقل في قوائم الأنشطة أو الطلبات.",
-										})}
+                                        <p className={styles.fieldNote}>لن نطلب الرقم القومي عند إنشاء الحساب. التحقق المطلوب للعمل يُستكمل مع الإدارة أو شركة التوصيل.</p>
 									</>
 								)}
 							</>
 						)}
-						{((registering && step === 2) || !registering) && (
+						{((registering && step === 1) || !registering) && (
 							<>
 								{input("phone", "رقم الموبايل", {
 									type: "tel",
 									inputMode: "tel",
 									placeholder: "01012345678",
-									autocomplete: "username",
+									autocomplete: registering ? "tel" : "username",
 									hint: "يمكنك استخدام الصيغة المحلية أو +20.",
 								})}
 								{passwordField("password", "كلمة المرور")}
@@ -559,7 +530,7 @@ export default function AuthForm({
 							</>
 						)}
 						<div className={styles.formActions}>
-							{registering && step > 0 && (
+							{registering && step > 0 && !skipRoleSelection && (
 								<button
 									className={styles.backButton}
 									type="button"
@@ -580,7 +551,7 @@ export default function AuthForm({
 								) : (
 									<>
 										{registering
-											? step === 2
+											? step === 1
 												? "إنشاء حسابي"
 												: "متابعة"
 											: "تسجيل الدخول"}
@@ -589,7 +560,8 @@ export default function AuthForm({
 								)}
 							</button>
 						</div>
-						<p className={styles.authSwitch}>
+						<p className={styles.fieldNote}>رقم الموبايل هو اسم الدخول. لا يتم توثيق ملكية الرقم تلقائيًا.</p>
+                        <p className={styles.authSwitch}>
 							{registering ? "لديك حساب بالفعل؟" : "ليس لديك حساب؟"}
 							<Link
 								href={`${registering ? "/login" : "/register"}?role=${role === "admin" ? "merchant" : role}`}

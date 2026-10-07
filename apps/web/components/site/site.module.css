@@ -1623,3 +1623,45 @@
  .visualHeading h2 { font-size: 17px; }
  .visualTop { flex-wrap: wrap; }
 }
+
+/* Installable application, shared identity and simple onboarding. */
+.fieldNote { font-size: 14px; line-height: 1.8; color: var(--muted); margin: 16px 0; }
+.installPage { max-width: 1120px; padding: 32px 32px 64px; margin: auto; }
+.installIntro { max-width: 700px; margin-bottom: 40px; }
+.installIntro h1 { font-size: 44px; line-height: 1.4; margin: 20px 0; font-weight: 800; }
+.installIntro h1 span { color: var(--accent); }
+.installIntro p { font-size: 18px; line-height: 1.9; color: var(--muted); }
+.installGrid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: start; }
+.installSurface { padding: 28px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.installSurface h2, .installHelp h2 { font-size: 24px; margin-bottom: 24px; font-weight: 800; }
+.installRoles { display: flex; flex-direction: column; gap: 12px; }
+.installRoles button { display: flex; align-items: center; text-align: right; gap: 16px; padding: 16px; min-height: 92px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); }
+.installRoles button > svg { flex-shrink: 0; color: var(--accent); }
+.installRoles button > span { flex: 1; }
+.installRoles b { font-size: 17px; display: block; margin-bottom: 4px; }
+.installRoles small { font-size: 14px; line-height: 1.7; color: var(--muted); display: block; }
+.installRoles .installSelected { background: var(--accent-soft); border-color: var(--accent); }
+.installActions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.installLogin { color: var(--accent); font-size: 16px; min-height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.installHelp { scroll-margin-top: 24px; }
+.installHelp > div { padding: 20px 0; border-bottom: 1px solid var(--border); }
+.installHelp > div > svg { color: var(--accent); margin-bottom: 8px; }
+.installHelp h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.installHelp p { font-size: 16px; color: var(--muted); line-height: 1.9; }
+.installSecurity { display: flex; gap: 12px; }
+.installSecurity svg { flex-shrink: 0; margin-top: 4px; }
+.installSuccess { display: flex; align-items: center; gap: 10px; color: var(--accent); font-weight: 700; padding: 12px; background: var(--accent-soft); border-radius: 8px; }
+.offlinePage { max-width: 680px; padding: 64px 24px; margin: auto; }
+.offlinePage > svg { color: var(--accent); margin-bottom: 24px; }
+.offlinePage h1 { font-size: 30px; font-weight: 800; margin-bottom: 16px; }
+.offlinePage p { font-size: 16px; line-height: 1.9; color: var(--muted); margin-bottom: 24px; }
+@media (min-width: 801px) and (max-width: 1250px) {.headerInner {flex-wrap:wrap}.nav{order:3;width:100%;justify-content:center}}
+@media(max-width:800px){.installPage{padding:24px 24px 48px}.installIntro h1{font-size:36px}.installGrid{grid-template-columns:1fr;gap:32px}.installIntro{margin-bottom:32px}}
+@media(max-width:480px){.installPage{padding:20px 20px 40px}.installIntro h1{font-size:32px}.installIntro p{font-size:16px}.installSurface{padding:20px}.installRoles button{padding:14px;gap:12px}.installSurface h2,.installHelp h2{font-size:22px}.installRoles b{font-size:16px}}
+
+.optionalDetails { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin: 0 0 20px; background: var(--surface); }
+.optionalDetails summary { cursor: pointer; min-height: 30px; font-size: 16px; font-weight: 700; color: var(--accent); }
+.optionalDetails[open] summary { margin-bottom: 12px; }
+.optionalDetails > .field:last-child { margin-bottom: 0; }
+
+@media(max-width:800px){.registerPage .authAside{display:none}.registerPage .authGrid{padding-top:16px}.registerPage .authForm{padding-top:0}}

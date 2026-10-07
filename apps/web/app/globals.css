@@ -2012,3 +2012,6 @@ body { font-size: 16px; line-height: 1.7; letter-spacing: 0; }
 .courier-brand-lockup { display: flex; align-items: center; gap: 8px; color: #067567; }
 .courier-wordmark { display: block; width: 132px; height: auto; color: #14282b; --accent: #067567; }
 @media(max-width:360px){.courier-brand{padding-inline:16px;gap:10px}.courier-wordmark{width:110px}}
+
+.account-install-link { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; font-size: 15px; font-weight: 700; color: #067567; border: 1px solid var(--line); border-radius: 8px; text-decoration: none; }
+@media(max-width:760px){.account-install-link{font-size:14px}.account-session-bar > span{flex-basis:100%}.account-session-bar button{margin-inline-start:auto}}

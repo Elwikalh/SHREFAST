@@ -1,5 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AlertCircle, LoaderCircle, LogOut, RotateCcw } from "lucide-react";
@@ -93,7 +94,8 @@ export default function WaslClient() {
 							: "رقم الهاتف غير موثّق"}
 					</small>
 				</span>
-				<button onClick={logout}>
+				<Link className="account-install-link" href={`/app?role=${user.role === "admin" ? "merchant" : user.role}`}>تثبيت التطبيق</Link>
+                <button onClick={logout}>
 					<LogOut size={16} aria-hidden="true" /> تسجيل الخروج
 				</button>
 			</div>

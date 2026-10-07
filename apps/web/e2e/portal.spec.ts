@@ -41,13 +41,12 @@ async function mockApi(page: Page, authStatus = 200, principal = user) {
 async function details(page: Page) {
 	await page.getByRole("button", { name: "متابعة", exact: true }).click();
 	await page
-		.getByLabel("اسم النشاط أو الشركة", { exact: true })
+		.getByLabel("اسم المطعم أو النشاط", { exact: true })
 		.fill("نشاط الاختبار");
 	await page.getByLabel("المنطقة", { exact: true }).fill("المعادي");
 	await page
 		.getByLabel("عنوان النشاط أو المقر", { exact: true })
 		.fill("عنوان اختبار محلي");
-	await page.getByRole("button", { name: "متابعة", exact: true }).click();
 }
 test("landing is RTL, responsive, with Lucide and real registration links", async ({
 	page,
@@ -56,7 +55,7 @@ test("landing is RTL, responsive, with Lucide and real registration links", asyn
 	page.on("pageerror", (e) => errors.push(e.message));
 	await page.goto("/");
 	await expect(page.getByRole("heading", { level: 1 })).toContainText("كل طلب");
-	await expect(page.locator("main svg.lucide").first()).toBeVisible();
+	await expect(page.locator("svg.lucide:visible").first()).toBeVisible();
 	await expect(page.getByText("معاينة توضيحية", { exact: true })).toBeVisible();
 	expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
 	expect(
@@ -70,58 +69,36 @@ test("landing is RTL, responsive, with Lucide and real registration links", asyn
 	await expect(page).toHaveURL(/\/register$/);
 	expect(errors).toEqual([]);
 });
-test("wizard validates details, preserves them backwards, and stops mismatched passwords", async ({
-	page,
-}) => {
-	await page.goto("/register");
-	await page.getByRole("button", { name: "متابعة", exact: true }).click();
-	await page.getByRole("button", { name: "متابعة", exact: true }).click();
-	await expect(
-		page.locator('[role="alert"]:not(#__next-route-announcer__)'),
-	).toBeVisible();
-	await page
-		.getByLabel("اسم النشاط أو الشركة", { exact: true })
-		.fill("نشاط الاختبار");
-	await page.getByLabel("المنطقة", { exact: true }).fill("المعادي");
-	await page
-		.getByLabel("عنوان النشاط أو المقر", { exact: true })
-		.fill("عنوان اختبار محلي");
-	await page.getByRole("button", { name: "متابعة", exact: true }).click();
-	await page.getByRole("button", { name: "رجوع", exact: true }).click();
-	await expect(page.getByLabel("المنطقة", { exact: true })).toHaveValue(
-		"المعادي",
-	);
-	await page.getByRole("button", { name: "متابعة", exact: true }).click();
-	await page.getByLabel("رقم الموبايل", { exact: true }).fill("01000000001");
-	await page
-		.getByLabel("كلمة المرور", { exact: true })
-		.fill("long-test-password");
-	await page
-		.getByLabel("تأكيد كلمة المرور", { exact: true })
-		.fill("different-password");
-	await page.getByRole("checkbox").check();
-	await page.getByRole("button", { name: "إنشاء حسابي", exact: true }).click();
-	await expect(
-		page.getByText("كلمتا المرور غير متطابقتين", { exact: true }),
-	).toBeVisible();
+test("simple registration validates details, preserves them backwards, and stops mismatched passwords", async ({page}) => {
+ await page.goto("/register");
+ await page.getByRole("button",{name:"متابعة",exact:true}).click();
+ await page.getByRole("button",{name:"إنشاء حسابي",exact:true}).click();
+ await expect(page.getByText("راجع البيانات المعلّمة أدناه.",{exact:true})).toBeVisible();
+ await page.getByLabel("اسم المطعم أو النشاط",{exact:true}).fill("نشاط الاختبار");
+ await page.getByLabel("المنطقة",{exact:true}).fill("المعادي");
+ await page.getByLabel("عنوان النشاط أو المقر",{exact:true}).fill("عنوان الاختبار");
+ await page.getByRole("button",{name:"رجوع",exact:true}).click();
+ await page.getByRole("button",{name:"متابعة",exact:true}).click();
+ await expect(page.getByLabel("المنطقة",{exact:true})).toHaveValue("المعادي");
+ await page.getByLabel("رقم الموبايل",{exact:true}).fill("01000000001");
+ await page.getByLabel("كلمة المرور",{exact:true}).fill("long-test-password");
+ await page.getByLabel("تأكيد كلمة المرور",{exact:true}).fill("different-password");
+ await page.getByRole("checkbox").check();
+ await page.getByRole("button",{name:"إنشاء حسابي",exact:true}).click();
+ await expect(page.getByText("كلمتا المرور غير متطابقتين",{exact:true})).toBeVisible();
 });
-for (const role of ["company", "courier"]) {
-	test(`${role} registration has required role-specific fields`, async ({
-		page,
-	}) => {
-		await page.goto(`/register?role=${role}`);
-		await page.getByRole("button", { name: "متابعة", exact: true }).click();
-		await expect(
-			page.getByLabel(role === "company" ? "نطاق التغطية" : "الرقم القومي", {
-				exact: true,
-			}),
-		).toBeVisible();
-		if (role === "courier")
-			await expect(
-				page.getByLabel("وسيلة التوصيل", { exact: true }),
-			).toBeVisible();
-	});
-}
+test("company uses one form with optional coverage and courier starts in the app", async ({page}) => {
+ await page.goto("/register?role=company");
+ await page.getByText("تفاصيل إضافية (اختياري)",{exact:true}).click();
+ await expect(page.getByLabel("نطاق التغطية (اختياري)",{exact:true})).toBeVisible();
+ await expect(page.getByRole("button",{name:"إنشاء حسابي",exact:true})).toBeVisible();
+ await page.goto("/register?role=courier");
+ await expect(page).toHaveURL(/app\?role=courier/);
+ await page.getByRole("link",{name:"إنشاء حساب المندوب",exact:true}).click();
+ await expect(page.getByLabel("وسيلة التوصيل",{exact:true})).toBeVisible();
+ await expect(page.getByLabel("الرقم القومي",{exact:true})).toHaveCount(0);
+ await expect(page.getByRole("button",{name:"إنشاء حسابي",exact:true})).toBeVisible();
+});
 test("duplicate-account response stays on registration with a useful error", async ({
 	page,
 }) => {
@@ -242,7 +219,7 @@ for (const role of ["company", "courier", "admin"]) {
 		await expect(
 			page.getByText("حدث خطأ غير متوقع في هذه الشاشة", { exact: true }),
 		).toHaveCount(0);
-		await expect(page.locator("main svg.lucide").first()).toBeVisible();
+		await expect(page.locator("svg.lucide:visible").first()).toBeVisible();
 		await page.waitForTimeout(500);
 		expect(errors).toEqual([]);
 	});

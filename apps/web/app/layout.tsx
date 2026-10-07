@@ -2,6 +2,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import InstallProvider from "@/components/site/install-provider";
 
 const SITE_URL =
 	process.env.NEXT_PUBLIC_SITE_URL ??
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 	title: "SHARE FAST — منصة إدارة التوصيل",
 	description: "منصة إدارة التوصيل SHARE FAST",
 	applicationName: "SHARE FAST",
+ appleWebApp: { capable: true, title: "SHARE FAST", statusBarStyle: "default" },
+ icons: { apple: "/app-icon/192" },
 };
 
 export const viewport: Viewport = {
@@ -40,7 +43,7 @@ export default function RootLayout({
 					rel="stylesheet"
 				/>
 			</head>
-			<body>{children}</body>
+			<body><InstallProvider>{children}</InstallProvider></body>
 		</html>
 	);
 }

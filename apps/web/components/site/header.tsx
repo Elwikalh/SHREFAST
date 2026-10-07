@@ -8,6 +8,7 @@ const links = [
  { href: "#solutions", label: "خدماتنا" },
  { href: "#how", label: "خطوات التسجيل" },
  { href: "#faq", label: "المساعدة" },
+ { href: "/app", label: "التطبيق" },
 ];
 export default function SiteHeader() {
  const [open, setOpen] = useState(false);
