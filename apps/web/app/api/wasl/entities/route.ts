@@ -1,15 +1,18 @@
-import { NextResponse } from "next/server"
-import { listWaslEntities } from "@/lib/wasl-store"
+import { authorizeWasl } from "@/lib/wasl-access";
+import { NextResponse } from "next/server";
+import { scopedEntities } from "@/lib/wasl-access";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-	const type = new URL(request.url).searchParams.get("type") || undefined
+	const access = await authorizeWasl(request, "entities");
+	if (access instanceof Response) return access;
+	const type = new URL(request.url).searchParams.get("type") || undefined;
 	try {
-		const rows = await listWaslEntities(type)
+		const rows = await scopedEntities(access, type);
 		return NextResponse.json({
 			ok: true,
-			entities: rows.map(e => ({
+			entities: rows.map((e) => ({
 				ref: e.ref,
 				type: e.type,
 				name: e.name,
@@ -19,9 +22,12 @@ export async function GET(request: Request) {
 				address: e.address,
 				businessType: e.business_type,
 			})),
-		})
+		});
 	} catch (error) {
-		console.error("[wasl] entities list failed", error)
-		return NextResponse.json({ ok: false, error: "db_unavailable" }, { status: 503 })
+		console.error("[wasl] entities list failed", error);
+		return NextResponse.json(
+			{ ok: false, error: "db_unavailable" },
+			{ status: 503 },
+		);
 	}
 }

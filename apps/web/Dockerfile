@@ -6,10 +6,12 @@ WORKDIR /app
 
 FROM base AS builder
 COPY . .
-# No pnpm-lock.yaml is committed yet, so this stays reproducible-but-not-frozen
-# until the first local `pnpm install` generates and commits the lockfile.
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
+# Enforce local quality gates even before GitHub Actions can be enabled.
+# Embedded PostgreSQL tests do not connect to the production DATABASE_URL.
+RUN pnpm lint && pnpm test
 RUN pnpm --filter @el7bboB/web... build
+RUN pnpm typecheck
 
 FROM base AS runner
 ENV NODE_ENV=production

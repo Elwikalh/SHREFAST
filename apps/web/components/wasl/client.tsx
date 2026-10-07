@@ -1,0 +1,109 @@
+"use client";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { AlertCircle, LoaderCircle, LogOut, RotateCcw } from "lucide-react";
+import type { Principal } from "@/lib/wasl-auth";
+import { apiFetch } from "@/lib/wasl-api";
+const Portal = dynamic(() => import("./portal"), {
+	ssr: false,
+	loading: () => (
+		<main className="portal-loading" role="status">
+			<LoaderCircle className="spin" aria-hidden="true" /> جارٍ تحميل بوابة
+			حسابك...
+		</main>
+	),
+});
+export default function WaslClient() {
+	const router = useRouter();
+	const [user, setUser] = useState<Principal | null>(null),
+		[error, setError] = useState(false),
+		[retry, setRetry] = useState(0);
+	useEffect(() => {
+		const controller = new AbortController();
+		apiFetch("/api/wasl/auth/me", { signal: controller.signal })
+			.then(async (response) => {
+				if (response.status === 401) {
+					router.replace("/login");
+					return;
+				}
+				if (!response.ok) throw new Error("unavailable");
+				const data = await response.json();
+				if (!data.user) throw new Error("unavailable");
+				// Legacy presentation state contains no session secret; server authorization remains authoritative.
+				try {
+					if (data.user.role === "courier")
+						localStorage.setItem(
+							"wasl_courier_acct",
+							JSON.stringify(data.user),
+						);
+				} catch {}
+				setUser(data.user);
+			})
+			.catch(() => {
+				if (!controller.signal.aborted) setError(true);
+			});
+		return () => controller.abort();
+	}, [retry, router]);
+	async function logout() {
+		try {
+			const response = await apiFetch("/api/wasl/auth/logout", {
+				method: "POST",
+			});
+			if (!response.ok) throw new Error("logout");
+			try {
+				localStorage.removeItem("wasl_courier_acct");
+			} catch {}
+			router.replace("/login");
+		} catch {
+			setError(true);
+		}
+	}
+	if (error)
+		return (
+			<main className="portal-loading" role="alert">
+				<AlertCircle aria-hidden="true" />
+				<div>تعذر الاتصال بحسابك. بياناتك لم تُحذف.</div>
+				<button
+					className="btn btn-o"
+					onClick={() => {
+						setError(false);
+						setRetry((x) => x + 1);
+					}}
+				>
+					<RotateCcw size={16} /> إعادة المحاولة
+				</button>
+			</main>
+		);
+	if (!user)
+		return (
+			<main className="portal-loading" role="status">
+				<LoaderCircle className="spin" aria-hidden="true" /> جارٍ التحقق من جلسة
+				الدخول...
+			</main>
+		);
+	return (
+		<>
+			<div className="account-session-bar">
+				<span>
+					{user.name}{" "}
+					<small>
+						{user.phoneVerified
+							? "رقم الهاتف موثّق"
+							: "حساب مسجل — ملكية الهاتف تحتاج تحققًا منفصلًا"}
+					</small>
+				</span>
+				<button onClick={logout}>
+					<LogOut size={16} aria-hidden="true" /> خروج
+				</button>
+			</div>
+			{["admin", "company"].includes(user.role) && (
+				<div className="portal-review-notice" role="note">
+					تنبيه مراجعة: بعض تقارير البوابات القديمة تحتوي بيانات عرض تجريبية. لا
+					تعتمد عليها للحسابات المالية؛ الطلبات المرتبطة بحسابك تأتي من الخادم.
+				</div>
+			)}
+			<Portal principal={user} />
+		</>
+	);
+}

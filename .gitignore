@@ -8,3 +8,8 @@ dist
 .DS_Store
 coverage
 .vercel
+
+playwright-report/
+test-results/
+
+*.tsbuildinfo

@@ -1,63 +1,105 @@
-import crypto from "crypto"
-import { createWaslInboxMessage } from "@/lib/wasl-store"
+import { verifyMetaSignature } from "@/lib/wasl-webhook";
+import { z } from "zod";
+import { createWaslInboxMessage } from "@/lib/wasl-store";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 // WhatsApp Cloud API webhook — رسايل العملاء بتوصل هنا أوتوماتيك وتظهر
 // في صندوق الوارد بلوحة النشاط، والتوزيع على المناديب بيتم من اللوحة.
 
-function verifySignature(raw: string, header: string | null, secret: string): boolean {
-	if (!header || !header.startsWith("sha256=")) return false
-	const expected = "sha256=" + crypto.createHmac("sha256", secret).update(raw, "utf8").digest("hex")
-	try {
-		return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(header))
-	} catch {
-		return false
-	}
-}
+const webhookSchema = z.object({
+	entry: z
+		.array(
+			z.object({
+				changes: z
+					.array(
+						z.object({
+							value: z.object({
+								messages: z
+									.array(
+										z.object({
+											id: z.string().min(1),
+											from: z.string(),
+											type: z.string(),
+											text: z.object({ body: z.string() }).optional(),
+										}),
+									)
+									.optional(),
+								contacts: z
+									.array(
+										z.object({
+											profile: z.object({ name: z.string() }).optional(),
+										}),
+									)
+									.optional(),
+							}),
+						}),
+					)
+					.optional(),
+			}),
+		)
+		.optional(),
+});
 
 export async function GET(request: Request) {
 	// خطوة التحقق الوحيدة المطلوبة عند تسجيل الـ webhook في لوحة Meta
-	const url = new URL(request.url)
-	const mode = url.searchParams.get("hub.mode")
-	const token = url.searchParams.get("hub.verify_token")
-	const challenge = url.searchParams.get("hub.challenge")
-	const expected = process.env.WASL_META_VERIFY_TOKEN || ""
+	const url = new URL(request.url);
+	const mode = url.searchParams.get("hub.mode");
+	const token = url.searchParams.get("hub.verify_token");
+	const challenge = url.searchParams.get("hub.challenge");
+	const expected = process.env.WASL_META_VERIFY_TOKEN || "";
 	if (mode === "subscribe" && expected && token === expected && challenge) {
-		return new Response(challenge, { status: 200, headers: { "content-type": "text/plain" } })
+		return new Response(challenge, {
+			status: 200,
+			headers: { "content-type": "text/plain" },
+		});
 	}
-	return new Response("forbidden", { status: 403 })
+	return new Response("forbidden", { status: 403 });
 }
 
 export async function POST(request: Request) {
-	const raw = await request.text()
-	const secret = process.env.WASL_META_APP_SECRET || ""
-	if (secret && !verifySignature(raw, request.headers.get("x-hub-signature-256"), secret)) {
-		return new Response("invalid signature", { status: 401 })
+	const secret = process.env.WASL_META_APP_SECRET || "";
+	// Fail closed even in development: never accept unsigned customer messages.
+	if (!secret) return new Response("webhook not configured", { status: 503 });
+	const raw = await request.text();
+	if (
+		!verifyMetaSignature(
+			raw,
+			request.headers.get("x-hub-signature-256"),
+			secret,
+		)
+	) {
+		return new Response("invalid signature", { status: 401 });
+	}
+	let payload: z.infer<typeof webhookSchema>;
+	try {
+		payload = webhookSchema.parse(JSON.parse(raw));
+	} catch {
+		return new Response("invalid payload", { status: 400 });
 	}
 	try {
-		const payload = JSON.parse(raw) as Record<string, unknown>
-		const entries = Array.isArray(payload?.entry) ? payload.entry : []
-		for (const entry of entries) {
-			const changes = Array.isArray(entry?.changes) ? entry.changes : []
-			for (const change of changes) {
-				const value = change?.value
-				const messages = Array.isArray(value?.messages) ? value.messages : []
-				const contacts = Array.isArray(value?.contacts) ? value.contacts : []
-				const profileName = contacts[0]?.profile?.name || null
-				for (const msg of messages) {
-					// رسايل نصية فقط حاليًا — الوسائط (صور/صوت) بتتجاهل
-					if (!msg || msg.type !== "text") continue
-					const body = String(msg.text?.body || "").trim()
-					const phone = String(msg.from || "").replace(/\D/g, "")
-					if (!body || !phone) continue
-					await createWaslInboxMessage({ senderPhone: phone, senderName: profileName || undefined, body })
+		for (const entry of payload.entry || []) {
+			for (const change of entry.changes || []) {
+				const value = change.value;
+				const profileName = value.contacts?.[0]?.profile?.name;
+				for (const msg of value.messages || []) {
+					if (msg.type !== "text") continue;
+					const body = msg.text?.body.trim() || "";
+					const phone = msg.from.replace(/\D/g, "");
+					if (!body || !phone) continue;
+					await createWaslInboxMessage({
+						messageId: msg.id,
+						senderPhone: phone,
+						senderName: profileName,
+						body,
+					});
 				}
 			}
 		}
 	} catch (error) {
-		console.error("[wasl-inbound] parse failed", error)
+		console.error("[wasl-inbound] storage failed", error);
+		// Ask Meta to retry; unique message IDs make partial batch retries safe.
+		return new Response("storage unavailable", { status: 503 });
 	}
-	// Meta يتوقع 200 دائمًا وإلا بيعيد إرسال نفس الرسالة
-	return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "content-type": "application/json" } })
+	return Response.json({ ok: true });
 }
