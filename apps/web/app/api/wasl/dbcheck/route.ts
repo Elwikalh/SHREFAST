@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import postgres from "postgres"
+import { db } from "@el7bboB/db"
+import { sql } from "drizzle-orm"
 
 export const dynamic = "force-dynamic"
 
@@ -34,15 +35,16 @@ export async function GET() {
 			starts: url.slice(0, 12),
 		})
 	}
-	const sql = postgres(url, { max: 1, connect_timeout: 5, idle_timeout: 5 })
 	try {
-		const v = await sql`select version()`
+		const res = await db.execute(sql`select version() as v`)
+		const rows = (res as unknown as { rows?: { v?: string }[] }).rows ?? (res as unknown as { v?: string }[])
+		const first = Array.isArray(rows) ? rows[0] : undefined
 		return NextResponse.json({
 			ok: true,
 			configured: true,
 			valid: true,
 			info,
-			server: String(v[0].version).slice(0, 30),
+			server: String(first?.v ?? "").slice(0, 30),
 		})
 	} catch (e) {
 		const err = e as Error
@@ -53,7 +55,5 @@ export async function GET() {
 			info,
 			error: String(err?.message || e).slice(0, 220),
 		})
-	} finally {
-		try { await sql.end({ timeout: 2 }) } catch {}
 	}
 }
