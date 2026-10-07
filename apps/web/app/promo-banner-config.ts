@@ -1,8 +1,0 @@
-export type PromoBanner={id:string;titleAr:string;titleEn:string;subtitleAr:string;subtitleEn:string;buttonAr:string;buttonEn:string;href:string;imageUrl:string;mobileImageUrl:string;enabled:boolean}
-export const DEFAULT_PROMO_BANNERS:PromoBanner[]=[
-{id:"foul",titleAr:"الطعم البلدي بلمسة عالمية",titleEn:"Egyptian soul, world-class taste",subtitleAr:"كل نضيف معمول بالحب",subtitleEn:"Made fresh with care",buttonAr:"اطلب الآن",buttonEn:"Order now",href:"#menu",imageUrl:"/promo-images/01",mobileImageUrl:"/promo-images/01",enabled:true},
-{id:"relax",titleAr:"روقان الحبوب",titleEn:"El7bboB mood",subtitleAr:"الروقان على أصوله",subtitleEn:"Breakfast done right",buttonAr:"شوف القائمة",buttonEn:"View menu",href:"#menu",imageUrl:"/promo-images/02",mobileImageUrl:"/promo-images/02",enabled:true},
-{id:"breakfast",titleAr:"فطار يروق من أول لقمة",titleEn:"A breakfast worth waking up for",subtitleAr:"طعم يفتح النفس من أول لقمة",subtitleEn:"Fresh, warm and satisfying",buttonAr:"اطلب فطارك",buttonEn:"Order breakfast",href:"#menu",imageUrl:"/promo-images/03",mobileImageUrl:"/promo-images/03",enabled:true},
-{id:"roots",titleAr:"كل لقمة معمولة على أصولها",titleEn:"Every bite made the right way",subtitleAr:"أكل نضيف وطعم متظبط",subtitleEn:"Clean food and bold flavor",buttonAr:"اطلب الآن",buttonEn:"Order now",href:"#menu",imageUrl:"/promo-images/04",mobileImageUrl:"/promo-images/04",enabled:true},
-{id:"mood",titleAr:"الطعم اللي يفتح النفس",titleEn:"Food that looks as good as it tastes",subtitleAr:"اختار روقانك وخليه علينا",subtitleEn:"Pick your favorite mix",buttonAr:"اكتشف الميكسات",buttonEn:"Explore mixes",href:"#mix",imageUrl:"/promo-images/05",mobileImageUrl:"/promo-images/05",enabled:true},
-]
