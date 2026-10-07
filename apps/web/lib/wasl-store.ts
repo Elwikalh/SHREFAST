@@ -38,7 +38,6 @@ function ensureTables(): Promise<void> {
 			await db.execute(sql`ALTER TABLE wasl_orders ADD COLUMN IF NOT EXISTS arrived_at TIMESTAMPTZ`)
 			await db.execute(sql`ALTER TABLE wasl_orders ADD COLUMN IF NOT EXISTS outcome TEXT`)
 			await db.execute(sql`ALTER TABLE wasl_orders ADD COLUMN IF NOT EXISTS ready_minutes INTEGER`)
-			await db.execute(sql`ALTER TABLE wasl_entities ADD COLUMN IF NOT EXISTS business_type TEXT`)
 			await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS wasl_inbox_seq`)
 			await db.execute(sql`CREATE TABLE IF NOT EXISTS wasl_inbox (
 				id INTEGER PRIMARY KEY DEFAULT nextval('wasl_inbox_seq'),
@@ -83,6 +82,7 @@ function ensureTables(): Promise<void> {
 				coverage_json TEXT,
 				created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 			)`)
+			await db.execute(sql`ALTER TABLE wasl_entities ADD COLUMN IF NOT EXISTS business_type TEXT`)
 		})().catch((error) => {
 			ensured = null
 			throw error
