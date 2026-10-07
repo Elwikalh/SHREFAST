@@ -1,4 +1,4 @@
-# Super X — SHREFAST
+# SHARE FAST — SHREFAST
 
 منصة إدارة التوصيل: بوابة نشاط تجاري، شركات توصيل، مناديب ولوحة إدارة، مع حزم المونوريبو الأصلية المشتركة.
 
@@ -15,7 +15,7 @@
 
 هذا مونوريبو (pnpm workspaces + Turborepo):
 
-- `apps/web` — موقع Next.js 16 (منصة Super X + الـAPI)
+- `apps/web` — موقع Next.js 16 (منصة SHARE FAST + الـAPI)
 - `packages/core` — منطق مشترك: التسعير، هامش الربح، ترقيم الأوردرات (بدون أي اعتماد على قاعدة بيانات)
 - `packages/db` — سكيما Drizzle + PostgreSQL + بذور المينيو (seed)
 

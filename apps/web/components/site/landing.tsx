@@ -19,17 +19,12 @@ import {
 	Zap,
 } from "lucide-react";
 import styles from "./site.module.css";
+import { ShareFastMark } from "../brand/share-fast-mark";
 export function Brand() {
-	return (
-		<Link href="/" className={styles.brand} aria-label="Super X — الرئيسية">
-			<span className={styles.brandMark}>
-				<Route size={24} strokeWidth={2.5} />
-			</span>
-			<span dir="ltr">
-				Super X<span className={styles.brandSub}>DELIVERY, CONNECTED.</span>
-			</span>
-		</Link>
-	);
+ return <Link href="/" className={styles.brand} dir="ltr" aria-label="SHARE FAST — الرئيسية">
+  <span className={styles.brandMark}><ShareFastMark /></span>
+  <span className={styles.wordmark}><span>SHARE</span><span className={styles.wordmarkFast}>FAST</span></span>
+ </Link>;
 }
 export default function Landing() {
 	return (
@@ -344,7 +339,7 @@ export default function Landing() {
 				<div>
 					<Link href="/privacy">بيانات التسجيل</Link>
 					<Link href="/login">تسجيل الدخول</Link>
-					<span dir="ltr">© {new Date().getFullYear()} Super X</span>
+					<span dir="ltr">© {new Date().getFullYear()} SHARE FAST</span>
 				</div>
 			</footer>
 		</div>

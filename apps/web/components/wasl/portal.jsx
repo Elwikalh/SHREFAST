@@ -4,6 +4,7 @@ import { apiFetch } from "../../lib/wasl-api";
 import * as ReactNamespace from "react";
 import * as jsxRuntime from "react/jsx-runtime";
 import S from "./icon";
+import { ShareFastMark } from "../brand/share-fast-mark";
 const we = ReactNamespace;
 var su = ReactNamespace;
 var z = jsxRuntime;
@@ -86,7 +87,7 @@ function De({ title: e, sub: a, children: t, extra: l }) {
 				"aria-label": "الإشعارات",
 				children: (0, z.jsx)(S, { n: "bell", s: 17 }),
 			}),
-			(0, z.jsx)("div", { className: "avatar", children: "SX" }),
+			(0, z.jsx)("div", { className: "avatar", children: jsxRuntime.jsx(ShareFastMark, { size: 30 }) }),
 		],
 	});
 }
@@ -2240,7 +2241,7 @@ function Um({ cur: e, go: a, store: t }) {
 									),
 								}),
 								(0, f.jsx)(F, {
-									title: "إحصائيات المنصة — Super X",
+									title: "إحصائيات المنصة — SHARE FAST",
 									action: (0, f.jsx)(E, {
 										c: "b-teal",
 										children: "مباشر",
@@ -4312,7 +4313,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 			Sl = c.length
 				? (0, d.jsx)(F, {
 						pad: !1,
-						title: "طلباتك على منصة Super X",
+						title: "طلباتك على منصة SHARE FAST",
 						action: (0, d.jsxs)(E, {
 							c: "b-teal",
 							children: [c.length, " طلب حقيقي"],
@@ -4481,7 +4482,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 												(0, d.jsx)(E, {
 													c: "b-teal",
 													icon: "bike",
-													children: "شبكة مناديب Super X",
+													children: "شبكة مناديب SHARE FAST",
 												}),
 												(0, d.jsx)(E, {
 													c: "b-blue",
@@ -4494,7 +4495,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 											className: "sub",
 											style: { fontSize: 12, lineHeight: 1.9 },
 											children:
-												"يُسند النظام كل طلب تلقائيًا إلى أقرب مندوب متاح في شبكة Super X — وتدفع رسوم التوصيل المعروضة على الطلب فقط.",
+												"يُسند النظام كل طلب تلقائيًا إلى أقرب مندوب متاح في شبكة SHARE FAST — وتدفع رسوم التوصيل المعروضة على الطلب فقط.",
 										}),
 									],
 								}),
@@ -5135,7 +5136,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 										children: [
 											(0, d.jsx)(S, { n: "target" }),
 											r.mode === "auto"
-												? "يُسند الطلب تلقائيًا إلى أقرب مندوب متاح في شبكة Super X — وسيظهر اسم المندوب وحالة الرحلة لحظة القبول."
+												? "يُسند الطلب تلقائيًا إلى أقرب مندوب متاح في شبكة SHARE FAST — وسيظهر اسم المندوب وحالة الرحلة لحظة القبول."
 												: "يظهر الطلب في طابور الإسناد لديك، وتُسنده بنفسك من لوحة التوزيع.",
 										],
 									}),
@@ -5179,7 +5180,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 				c.length > 0 &&
 					(0, d.jsx)(F, {
 						pad: !1,
-						title: "طلباتك المسجلة على منصة Super X",
+						title: "طلباتك المسجلة على منصة SHARE FAST",
 						action: (0, d.jsx)(E, {
 							c: "b-teal",
 							children: "حقيقي",
@@ -5715,14 +5716,14 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 								children: (0, d.jsx)(E, {
 									c: "b-teal",
 									icon: "globe",
-									children: "كل الطلبات تُسند عبر شبكة Super X",
+									children: "كل الطلبات تُسند عبر شبكة SHARE FAST",
 								}),
 							}),
 							(0, d.jsx)("div", {
 								className: "sub",
 								style: { fontSize: 12, lineHeight: 1.9 },
 								children:
-									"طلباتك تُسند تلقائيًا إلى أقرب مندوب متاح في شبكة Super X وتدفع رسوم المسافة فقط. وإذا أردت فريقًا خاصًا بك، ادعُ مناديبك من هنا — يسجلون برقم الموبايل وكود الدعوة ويظهر فريقك في هذه الصفحة.",
+									"طلباتك تُسند تلقائيًا إلى أقرب مندوب متاح في شبكة SHARE FAST وتدفع رسوم المسافة فقط. وإذا أردت فريقًا خاصًا بك، ادعُ مناديبك من هنا — يسجلون برقم الموبايل وكود الدعوة ويظهر فريقك في هذه الصفحة.",
 							}),
 						],
 					}),
@@ -5979,7 +5980,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 					}),
 				Te.length > 0 &&
 					(0, d.jsxs)(F, {
-						title: "فريقك المسجل في Super X",
+						title: "فريقك المسجل في SHARE FAST",
 						pad: !1,
 						children: [
 							(0, d.jsxs)("table", {
@@ -6276,7 +6277,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 							className: "sub",
 							style: { lineHeight: 2 },
 							children:
-								"الشراكة اختيارية تمامًا — طلباتك تعمل الآن عبر شبكة مناديب Super X مباشرة. يمكنك إنشاء شراكة لاحقًا من زر \xABأنشئ شراكة\xBB لتقاسم أسطول ثابت مع أنشطة في نفس منطقتك.",
+								"الشراكة اختيارية تمامًا — طلباتك تعمل الآن عبر شبكة مناديب SHARE FAST مباشرة. يمكنك إنشاء شراكة لاحقًا من زر \xABأنشئ شراكة\xBB لتقاسم أسطول ثابت مع أنشطة في نفس منطقتك.",
 						}),
 					}),
 				],
@@ -6887,7 +6888,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 												className: "note",
 												children: [
 													(0, d.jsx)(S, { n: "info" }),
-													" يُوزع النصيب الأساسي تلقائيًا بالتساوي مع كل عضو يقبل الدعوة، ويُحدَّث الاستخدام من الطلبات الفعلية كل شهر — بدون أي عمولة لـ Super X على التسويات.",
+													" يُوزع النصيب الأساسي تلقائيًا بالتساوي مع كل عضو يقبل الدعوة، ويُحدَّث الاستخدام من الطلبات الفعلية كل شهر — بدون أي عمولة لـ SHARE FAST على التسويات.",
 												],
 											}),
 										}),
@@ -6914,7 +6915,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 													children: "واحتياطيًا",
 												}),
 												(0, d.jsx)("b", {
-													children: "شبكة Super X المستقلين",
+													children: "شبكة SHARE FAST المستقلين",
 												}),
 											],
 										}),
@@ -7234,7 +7235,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 									className: "sub",
 									style: { fontSize: 12, lineHeight: 1.9, marginBottom: 10 },
 									children:
-										"طلباتك تُسند حاليًا عبر شبكة مناديب Super X برسوم المسافة فقط. لتفعيل فريق خاص، سجّل مناديبك من صفحة \xABمناديبي\xBB — وبعدها تظهر هنا خيارات طريقة الدفع والمستحقات.",
+										"طلباتك تُسند حاليًا عبر شبكة مناديب SHARE FAST برسوم المسافة فقط. لتفعيل فريق خاص، سجّل مناديبك من صفحة \xABمناديبي\xBB — وبعدها تظهر هنا خيارات طريقة الدفع والمستحقات.",
 								}),
 							Te.length > 0 &&
 								(0, d.jsxs)(d.Fragment, {
@@ -7381,7 +7382,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 									className: "note",
 									children: [
 										(0, d.jsx)(S, { n: "zap" }),
-										" تُرسل طلباتك تلقائيًا إلى شبكة مناديب Super X المستقلين — تدفع رسوم المسافة \xABمن — إلى\xBB فقط، دون أي التزامات مع مندوب بعينه. ويمكنك في أي وقت تسجيل مناديبك من صفحة \xABمناديبي\xBB.",
+										" تُرسل طلباتك تلقائيًا إلى شبكة مناديب SHARE FAST المستقلين — تدفع رسوم المسافة \xABمن — إلى\xBB فقط، دون أي التزامات مع مندوب بعينه. ويمكنك في أي وقت تسجيل مناديبك من صفحة \xABمناديبي\xBB.",
 									],
 								}),
 						],
@@ -9547,7 +9548,7 @@ function Gm({ cur: e, go: a, store: t, initialRef = "" }) {
 					N.length > 0 &&
 					(0, s.jsxs)(F, {
 						pad: !1,
-						title: "مناديبكم المسجلون رسميًا في Super X",
+						title: "مناديبكم المسجلون رسميًا في SHARE FAST",
 						action: (0, s.jsx)(Om, {
 							text: N.filter((T) => T.status === "invited")
 								.map((T) => T.name + ": " + T.inviteCode)
@@ -13433,9 +13434,9 @@ function b2({ open: e }) {
 				(0, A.jsxs)("div", {
 					className: "hero",
 					children: [
-						(0, A.jsx)("div", { className: "logo", children: "SX" }),
+						(0, A.jsx)("div", { className: "logo", children: jsxRuntime.jsx(ShareFastMark, { size: 30 }) }),
 						(0, A.jsx)("h1", {
-							children: "Super X — منظومة إدارة التوصيل المتكاملة",
+							children: "SHARE FAST — منظومة إدارة التوصيل المتكاملة",
 						}),
 						(0, A.jsx)("p", {
 							children:
@@ -13521,7 +13522,7 @@ function b2({ open: e }) {
 				}),
 				(0, A.jsx)("div", {
 					className: "ver",
-					children: "Super X \xA9 2026 — منصة إدارة التوصيل",
+					children: "SHARE FAST \xA9 2026 — منصة إدارة التوصيل",
 				}),
 			],
 		})
@@ -13617,7 +13618,7 @@ function x2({ goPortal: e, toast: a }) {
 				children: (0, A.jsxs)("div", {
 					className: "hero",
 					children: [
-						(0, A.jsx)("div", { className: "logo", children: "SX" }),
+						(0, A.jsx)("div", { className: "logo", children: jsxRuntime.jsx(ShareFastMark, { size: 30 }) }),
 						(0, A.jsx)("h1", {
 							children: "تم التسجيل بنجاح \u{1F389}",
 						}),
@@ -13681,9 +13682,9 @@ function x2({ goPortal: e, toast: a }) {
 					(0, A.jsxs)("div", {
 						className: "hero",
 						children: [
-							(0, A.jsx)("div", { className: "logo", children: "SX" }),
+							(0, A.jsx)("div", { className: "logo", children: jsxRuntime.jsx(ShareFastMark, { size: 30 }) }),
 							(0, A.jsx)("h1", {
-								children: "تسجيل جديد — Super X",
+								children: "تسجيل جديد — SHARE FAST",
 							}),
 							(0, A.jsx)("p", {
 								children:
@@ -14149,7 +14150,7 @@ function L2({ principal }) {
 										(0, A.jsx)("div", {
 											className: "sub",
 											style: { fontSize: 11.5 },
-											children: "طلب مندوب توصيل — خدمة Super X",
+											children: "طلب مندوب توصيل — خدمة SHARE FAST",
 										}),
 									],
 								}),
@@ -14192,8 +14193,8 @@ function L2({ principal }) {
 				: J,
 		Ce = {
 			admin: {
-				logo: "SX",
-				name: "Super X",
+				logo: jsxRuntime.jsx(ShareFastMark, { size: 30 }),
+				name: "SHARE FAST",
 				role: "لوحة تحكم المنصة",
 				footNote: {
 					title: "حالة النظام",
@@ -14201,16 +14202,16 @@ function L2({ principal }) {
 				},
 			},
 			merchant: {
-				logo: "SX",
+				logo: jsxRuntime.jsx(ShareFastMark, { size: 30 }),
 				name: R || "حساب النشاط",
 				role: "بوابة النشاط التجاري",
 				footNote: {
 					title: "منطقة التشغيل",
-					text: "تتحدد تلقائيًا من ملف نشاطك المسجّل في Super X.",
+					text: "تتحدد تلقائيًا من ملف نشاطك المسجّل في SHARE FAST.",
 				},
 			},
 			company: {
-				logo: "س",
+				logo: jsxRuntime.jsx(ShareFastMark, { size: 30 }),
 				name: principal.name,
 				role: "بوابة شركة التوصيل",
 				footNote: {

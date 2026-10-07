@@ -247,3 +247,16 @@ for (const role of ["company", "courier", "admin"]) {
 		expect(errors).toEqual([]);
 	});
 }
+
+test("SHARE FAST identity, mark and favicon are consistent on public pages", async ({page,request}) => {
+ for(const path of ["/","/register","/login","/privacy"]){
+  await page.goto(path);
+  await expect(page).toHaveTitle(/SHARE FAST/);
+  await expect(page.getByRole("link",{name:"SHARE FAST — الرئيسية",exact:true}).first()).toBeVisible();
+  await expect(page.getByTestId("share-fast-mark").first()).toBeVisible();
+  await expect(page.getByText(/Super X/)).toHaveCount(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ }
+ const favicon=await request.get("/icon.svg");expect(favicon.status()).toBe(200);expect(favicon.headers()["content-type"]).toContain("image/svg+xml");
+ const logo=await request.get("/brand/share-fast-logo.svg");expect(logo.status()).toBe(200);expect(await logo.text()).toContain("SHARE FAST");
+});

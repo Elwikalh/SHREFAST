@@ -1,6 +1,6 @@
 import AuthForm from "@/components/site/auth-form";
 import type { Principal } from "@/lib/wasl-auth";
-export const metadata = { title: "تسجيل الدخول — Super X" };
+export const metadata = { title: "تسجيل الدخول — SHARE FAST" };
 export default async function Login({
 	searchParams,
 }: {

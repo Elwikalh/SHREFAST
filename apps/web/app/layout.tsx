@@ -9,13 +9,13 @@ const SITE_URL =
 
 export const metadata: Metadata = {
 	metadataBase: new URL(SITE_URL),
-	title: "Super X — منصة إدارة التوصيل",
-	description: "منصة إدارة التوصيل Super X",
-	applicationName: "Super X",
+	title: "SHARE FAST — منصة إدارة التوصيل",
+	description: "منصة إدارة التوصيل SHARE FAST",
+	applicationName: "SHARE FAST",
 };
 
 export const viewport: Viewport = {
-	themeColor: "#0f172a",
+	themeColor: "#067567",
 };
 
 const fontVariables = {

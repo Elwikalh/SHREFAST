@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Brand } from "@/components/site/landing";
 import styles from "@/components/site/site.module.css";
-export const metadata = { title: "بيانات التسجيل — Super X" };
+export const metadata = { title: "بيانات التسجيل — SHARE FAST" };
 export default function Privacy() {
 	return (
 		<div className={styles.site}>

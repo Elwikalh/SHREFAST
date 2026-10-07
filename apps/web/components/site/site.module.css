@@ -1465,3 +1465,10 @@
 		gap: 10px;
 	}
 }
+
+/* SHARE FAST: one shared route, a clear English wordmark, and a compact mobile lockup. */
+.wordmark{font-family:Arial,Helvetica,sans-serif;display:inline-flex;align-items:baseline;gap:6px;font-size:21px;font-weight:900;letter-spacing:.65px;line-height:1;white-space:nowrap}
+.wordmarkFast{color:var(--accent)}
+.brandMark{border-radius:11px;flex-shrink:0}.brandMark svg{display:block}
+@media(max-width:480px){.wordmark{font-size:16px;gap:4px;letter-spacing:.2px}.brand{gap:9px}.brandMark{width:36px;height:36px;border-radius:9px}.brandMark svg{width:29px;height:29px}}
+@media(max-width:360px){.headerInner{padding-inline:12px;gap:8px}.headerActions{gap:8px}.smallPrimary{padding-inline:9px}.wordmark{font-size:15px}.headerInner .brand{gap:7px}}

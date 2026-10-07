@@ -1909,3 +1909,8 @@ textarea {
 	font-size: 14px;
 	line-height: 1.8;
 }
+
+/* Keep the shared identity clean in the legacy operating portals. */
+.brand .logo{background:#067567;border-radius:10px;box-shadow:none}.brand .logo svg,.avatar svg{display:block;flex-shrink:0}
+
+.avatar:has([data-testid="share-fast-mark"]){background:#067567;color:#fff;box-shadow:none}
