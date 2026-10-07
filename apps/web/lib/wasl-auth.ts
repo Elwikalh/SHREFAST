@@ -86,15 +86,24 @@ export function ensureAuthTables() {
 	}));
 }
 export function assertSameOrigin(request: Request) {
-	const origin = request.headers.get("origin");
-	const allowed = [new URL(request.url).origin];
-	if (process.env.NEXT_PUBLIC_SITE_URL) {
-		try {
-			allowed.push(new URL(process.env.NEXT_PUBLIC_SITE_URL).origin);
-		} catch {}
-	}
-	if (!origin || !allowed.includes(origin))
-		throw new AuthError("invalid_origin", 403);
+ const origin = request.headers.get("origin");
+ if (!origin) throw new AuthError("invalid_origin", 403);
+ let parsed: URL;
+ try { parsed = new URL(origin); } catch { throw new AuthError("invalid_origin", 403); }
+ if (parsed.origin !== origin || (process.env.NODE_ENV === "production" && parsed.protocol !== "https:")) throw new AuthError("invalid_origin", 403);
+ const allowed = new Set([new URL(request.url).origin]);
+ // Read public configuration dynamically: Docker runtime values must not be frozen into the build.
+ for (const key of ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_APP_URL", "RAILWAY_PUBLIC_DOMAIN"]) {
+  const value = process.env[key]; if (!value) continue;
+  try { allowed.add(new URL(key === "RAILWAY_PUBLIC_DOMAIN" ? `https://${value}` : value).origin); } catch {}
+ }
+ // Next standalone can receive an internal HTTP URL behind Railway TLS termination.
+ // Host is the request authority; never trust an arbitrary X-Forwarded-Host as an origin allowlist.
+ const host = request.headers.get("host");
+ if (host && /^[a-zA-Z0-9.-]+(?::[0-9]{1,5})?$/.test(host)) {
+  try { allowed.add(new URL(`https://${host}`).origin); } catch {}
+ }
+ if (!allowed.has(origin)) throw new AuthError("invalid_origin", 403);
 }
 export async function rateLimit(
 	request: Request,
