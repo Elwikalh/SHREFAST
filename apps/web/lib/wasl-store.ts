@@ -922,6 +922,7 @@ export async function setWaslSetting(key: string, value: unknown): Promise<void>
 // ===== Platform stats (لوحة الإدارة — أرقام حية من القاعدة) =====
 export async function waslPlatformStats() {
 	await ensureTables()
+	await ensurePartnershipTables()
 	await ensureCourierTables()
 	await ensureClientInviteTables()
 	const count = async (q: ReturnType<typeof sql>) => rowsOf<{ n: number }>(await db.execute(q))[0]?.n ?? 0
