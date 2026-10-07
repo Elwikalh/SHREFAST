@@ -1,0 +1,18 @@
+import { loadSandwichBreadCatalog } from "./sandwich-bread-store"
+import { breadChoices, sandwichBreadEligible, isSandwichBread } from "./sandwich-bread"
+import { isProductExtra } from "./product-extras"
+import { loadMealSelections } from "./meal-settings-store"
+import { ensureBreakfastBuilderItems } from "./meal-bootstrap"
+import { mealKindForSlug } from "./meal-config"
+import { asc,eq } from "drizzle-orm"
+import { CUSTOM_MIX_MENU_SLUG,db,ensureCustomMixMenuItem,menuItems,siteSettings } from "@el7bboB/db"
+import { HomeView,type HomeMenuItem } from "./home-view"
+import { HERO_FALLBACK_IMAGE } from "./hero-image"
+import { FALLBACK_IMAGE_BY_SLUG } from "./food-fallbacks"
+import { loadPromoBanners } from "./promo-banner-store"
+import { loadDeliveryBranch } from "./order/delivery-branch"
+import { CartBranchGuard } from "./order/[branchCode]/cart-branch-guard"
+
+export const dynamic="force-dynamic"
+const SITE_URL=process.env.NEXT_PUBLIC_SITE_URL??"https://el7bbob-production.up.railway.app"
+export default async function HomePage(){await ensureCustomMixMenuItem();await ensureBreakfastBuilderItems();const[rows,settingsRows,branch,banners,mealSelections]=await Promise.all([db.select().from(menuItems).where(eq(menuItems.isAvailable,true)).orderBy(asc(menuItems.category),asc(menuItems.sortOrder)),db.select().from(siteSettings).where(eq(siteSettings.id,"default")),loadDeliveryBranch(),loadPromoBanners(),loadMealSelections()]);const breadCatalog=await loadSandwichBreadCatalog();const settings=settingsRows[0],customerRows=rows.filter((item)=>!isProductExtra(item.slug)&&!isSandwichBread(item.slug)&&(item.slug===CUSTOM_MIX_MENU_SLUG||!!mealKindForSlug(item.slug)||(sandwichBreadEligible(item)&&breadCatalog.configs[item.id]?.enabled)||(Number.isFinite(Number(item.priceEGP))&&Number(item.priceEGP)>0)));const items:HomeMenuItem[]=customerRows.map((item)=>({id:item.id,slug:item.slug,nameAr:item.nameAr,nameEn:item.nameEn,category:item.category,priceEGP:Number(item.priceEGP),image:item.photoDataUrl??FALLBACK_IMAGE_BY_SLUG[item.slug]??null,photoCount:(item.photoDataUrl||FALLBACK_IMAGE_BY_SLUG[item.slug]?1:0)+(item.photosJson?.length??0),descriptionAr:item.descriptionAr??null,descriptionEn:item.descriptionEn??null,...(sandwichBreadEligible(item)&&breadCatalog.configs[item.id]?.enabled?{breadChoices:breadChoices(item,breadCatalog.products,breadCatalog.configs[item.id])}:{})}));const heroImage=settings?.heroImageDataUrl??HERO_FALLBACK_IMAGE,jsonLd=JSON.stringify({"@context":"https://schema.org","@type":"Restaurant",name:"الحَبّوب",alternateName:"El7bboB",url:SITE_URL,servesCuisine:["Egyptian","Breakfast","Street Food"],priceRange:"$",address:branch?.address?{"@type":"PostalAddress",streetAddress:branch.address,addressLocality:"المنصورة",addressCountry:"EG"}:undefined,potentialAction:{"@type":"OrderAction",target:`${SITE_URL}/order/checkout`}}).replace(/</g,"\\u003c");return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd}}/>{branch?<CartBranchGuard branchCode={`delivery:${branch.code}`}/>:null}<HomeView items={items} heroImage={heroImage} banners={banners} mealSelections={mealSelections} shop={branch?{name:branch.name,address:branch.address}:null}/></>}

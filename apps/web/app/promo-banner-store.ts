@@ -1,0 +1,8 @@
+import "server-only"
+import { eq } from "drizzle-orm"
+import { db,siteSettings } from "@el7bboB/db"
+import { DEFAULT_PROMO_BANNERS,type PromoBanner } from "./promo-banner-config"
+const ROW_ID="promo-banners"
+function clean(value:unknown):PromoBanner[]{if(!Array.isArray(value))return DEFAULT_PROMO_BANNERS;return value.slice(0,10).flatMap((item,index)=>{if(!item||typeof item!=="object")return[];const v=item as Partial<PromoBanner>;if(typeof v.imageUrl!=="string"||!v.imageUrl.trim())return[];const desktop=v.imageUrl.trim(),mobile=typeof v.mobileImageUrl==="string"&&v.mobileImageUrl.trim()?v.mobileImageUrl.trim():desktop;return[{id:typeof v.id==="string"&&v.id?v.id:`banner-${index+1}`,titleAr:String(v.titleAr??"").slice(0,120),titleEn:String(v.titleEn??"").slice(0,120),subtitleAr:String(v.subtitleAr??"").slice(0,180),subtitleEn:String(v.subtitleEn??"").slice(0,180),buttonAr:String(v.buttonAr??"اطلب الآن").slice(0,40),buttonEn:String(v.buttonEn??"Order now").slice(0,40),href:typeof v.href==="string"&&v.href.trim()?v.href.trim():"#menu",imageUrl:desktop,mobileImageUrl:mobile,enabled:v.enabled!==false}]})}
+export async function loadPromoBanners(){const[row]=await db.select().from(siteSettings).where(eq(siteSettings.id,ROW_ID)).limit(1);if(!row?.heroImageDataUrl)return DEFAULT_PROMO_BANNERS;try{return clean(JSON.parse(row.heroImageDataUrl))}catch{return DEFAULT_PROMO_BANNERS}}
+export async function savePromoBanners(value:PromoBanner[]){const banners=clean(value);await db.insert(siteSettings).values({id:ROW_ID,heroImageDataUrl:JSON.stringify(banners)}).onConflictDoUpdate({target:siteSettings.id,set:{heroImageDataUrl:JSON.stringify(banners),updatedAt:new Date()}});return banners}

@@ -1,0 +1,2 @@
+import { Loader2 } from "lucide-react"
+export default function Loading(){return <div dir="rtl" className="flex min-h-[55vh] items-center justify-center"><div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white px-5 py-4 text-sm font-black shadow-[var(--shadow-sm)]"><Loader2 className="h-5 w-5 animate-spin text-[var(--amber-deep)]"/>جارٍ تحميل البيانات...</div></div>}

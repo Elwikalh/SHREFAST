@@ -1,0 +1,3 @@
+import Link from "next/link"
+import { Home,SearchX } from "lucide-react"
+export default function NotFound(){return <main dir="rtl" className="flex min-h-screen items-center justify-center px-4"><section className="card max-w-md p-8 text-center"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[var(--sesame)] text-[var(--amber-deep)]"><SearchX className="h-7 w-7"/></span><h1 className="mt-4 text-2xl font-black">الصفحة غير موجودة</h1><p className="mt-2 text-sm font-bold text-[var(--ink)]/50">ربما تم تغيير الرابط أو لم يعد المحتوى متاحًا.</p><Link href="/" className="btn btn-primary mt-6 px-6 py-3"><Home className="h-4 w-4"/>العودة إلى الرئيسية</Link></section></main>}

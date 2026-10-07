@@ -1,0 +1,292 @@
+@import "tailwindcss";
+
+/* =====================================================================
+   Design tokens. Every screen pulls its colour, elevation and focus ring
+   from here, so the whole site changes look from one place instead of
+   each page inventing its own shade.
+   ===================================================================== */
+:root {
+	color-scheme: light;
+
+	/* Brand palette */
+	--ink: #1f1b18;
+	--ink-70: rgba(31, 27, 24, 0.62);
+	--amber: #f7ae33;
+	--amber-deep: #d98b18;
+	--amber-soft: #fde4b3;
+	--terracotta: #d2542f;
+	--cream: #fdf6e7;
+	--cream-deep: #f8eed8;
+	--sesame: #f4ead3;
+	--zaatar: #4f7a55;
+	--line: #e3d9c2;
+	--line-strong: #d8c9a5;
+
+	/* Surfaces */
+	--surface: #ffffff;
+	--surface-muted: #fffcf4;
+
+	/* Warm elevation. Neutral grey shadows read as dirt on a cream page, so
+	   every shadow is tinted with the same baked-bread brown. */
+	--shadow-sm: 0 1px 2px rgba(90, 66, 22, 0.06), 0 1px 3px rgba(90, 66, 22, 0.05);
+	--shadow-md: 0 6px 16px -6px rgba(90, 66, 22, 0.18), 0 2px 6px rgba(90, 66, 22, 0.06);
+	--shadow-lg: 0 24px 48px -20px rgba(90, 66, 22, 0.28), 0 8px 18px -10px rgba(90, 66, 22, 0.12);
+	--shadow-amber: 0 12px 28px -10px rgba(217, 139, 24, 0.5);
+
+	--ring: 0 0 0 3px rgba(247, 174, 51, 0.45);
+}
+
+@layer base {
+	html {
+		-webkit-text-size-adjust: 100%;
+		scroll-behavior: smooth;
+	}
+
+	body {
+		background-color: var(--cream);
+		/* Two soft warm lights plus a faint sesame speckle: without them large
+		   empty areas look like flat printer paper. */
+		background-image:
+			radial-gradient(1100px 520px at 88% -12%, rgba(247, 174, 51, 0.18), transparent 62%),
+			radial-gradient(820px 460px at -12% 4%, rgba(79, 122, 85, 0.09), transparent 58%),
+			radial-gradient(rgba(31, 27, 24, 0.045) 1px, transparent 1px);
+		background-size: auto, auto, 22px 22px;
+		background-attachment: fixed, fixed, fixed;
+		color: var(--ink);
+		font-family: var(--font-arabic), var(--font-latin), "Noto Sans Arabic", sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Arabic script must never be letter-spaced — it breaks the joins. Only
+	   the Latin wordmark carries tracking, and it opts in per element. */
+	h1,
+	h2,
+	h3 {
+		line-height: 1.28;
+		letter-spacing: 0;
+	}
+
+	::selection {
+		background: var(--amber);
+		color: var(--ink);
+	}
+
+	/* One visible keyboard focus style everywhere instead of the browser's
+	   blue ring clashing with the warm palette. */
+	:focus-visible {
+		outline: none;
+		box-shadow: var(--ring);
+	}
+
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--line-strong) transparent;
+	}
+
+	*::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		background: var(--line-strong);
+		border: 3px solid transparent;
+		background-clip: content-box;
+		border-radius: 9999px;
+	}
+
+	input,
+	textarea,
+	select,
+	button {
+		font: inherit;
+	}
+}
+
+@layer components {
+	/* Card surfaces ---------------------------------------------------- */
+	.card {
+		background: var(--surface);
+		border: 1px solid var(--line);
+		border-radius: 1.25rem;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.card-lift {
+		transition:
+			transform 0.18s ease,
+			box-shadow 0.18s ease,
+			border-color 0.18s ease;
+	}
+
+	.card-lift:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-md);
+		border-color: var(--line-strong);
+	}
+
+	/* Frosted bars: sticky headers and bottom bars sit over content. */
+	.glass {
+		background-color: rgba(253, 246, 231, 0.82);
+		backdrop-filter: blur(14px) saturate(140%);
+		-webkit-backdrop-filter: blur(14px) saturate(140%);
+	}
+
+	.glass-dark {
+		background-color: rgba(31, 27, 24, 0.86);
+		backdrop-filter: blur(14px) saturate(140%);
+		-webkit-backdrop-filter: blur(14px) saturate(140%);
+	}
+
+	/* Buttons ---------------------------------------------------------- */
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: 1rem;
+		font-weight: 800;
+		line-height: 1;
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease,
+			background-color 0.15s ease,
+			filter 0.15s ease,
+			opacity 0.15s ease;
+	}
+
+	.btn:active:not(:disabled) {
+		transform: translateY(1px) scale(0.99);
+	}
+
+	.btn:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+
+	.btn-primary {
+		background-image: linear-gradient(180deg, var(--amber) 0%, var(--amber-deep) 100%);
+		color: var(--ink);
+		box-shadow: var(--shadow-amber);
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		filter: brightness(1.04);
+	}
+
+	.btn-dark {
+		background-color: var(--ink);
+		color: var(--cream);
+		box-shadow: var(--shadow-md);
+	}
+
+	.btn-outline {
+		border: 1px solid var(--line-strong);
+		background-color: var(--surface);
+		color: var(--ink);
+	}
+
+	.btn-outline:hover:not(:disabled) {
+		background-color: var(--sesame);
+	}
+
+	/* Small labels ----------------------------------------------------- */
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		border-radius: 9999px;
+		background-color: var(--sesame);
+		padding: 0.375rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: rgba(31, 27, 24, 0.72);
+	}
+
+	.chip-outline {
+		background-color: transparent;
+		border: 1px solid var(--line);
+		color: rgba(31, 27, 24, 0.6);
+	}
+
+	/* Form fields ------------------------------------------------------ */
+	.input {
+		width: 100%;
+		border-radius: 1rem;
+		border: 1px solid var(--line);
+		background-color: var(--surface);
+		padding: 0.75rem 1rem;
+		font-weight: 600;
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.input:focus {
+		outline: none;
+		border-color: var(--amber-deep);
+		box-shadow: var(--ring);
+	}
+
+	.input::placeholder {
+		color: rgba(31, 27, 24, 0.35);
+		font-weight: 600;
+	}
+
+	/* Details ---------------------------------------------------------- */
+	.hairline {
+		height: 1px;
+		background-image: linear-gradient(to left, transparent, var(--line), transparent);
+	}
+
+	.skeleton {
+		background-image: linear-gradient(90deg, var(--sesame) 25%, #fffaf0 37%, var(--sesame) 63%);
+		background-size: 400% 100%;
+		animation: shimmer 1.4s ease-in-out infinite;
+	}
+
+	.rise {
+		animation: rise 0.35s cubic-bezier(0.22, 0.68, 0, 1) both;
+	}
+
+	/* Prices and quantities must not jitter as digits change. */
+	.num {
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes shimmer {
+	from {
+		background-position: 100% 0;
+	}
+	to {
+		background-position: 0 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+	}
+}

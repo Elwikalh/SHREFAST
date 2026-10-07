@@ -1,0 +1,5 @@
+"use client"
+import { useEffect } from "react"
+import Link from "next/link"
+import { Home,RefreshCw,TriangleAlert } from "lucide-react"
+export default function GlobalError({error,reset}:{error:Error&{digest?:string};reset:()=>void}){useEffect(()=>{console.error(error)},[error]);return <main dir="rtl" className="flex min-h-screen items-center justify-center px-4"><section className="card max-w-md p-8 text-center"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[var(--terracotta)]/10 text-[var(--terracotta)]"><TriangleAlert className="h-7 w-7"/></span><h1 className="mt-4 text-2xl font-black">تعذر تحميل الصفحة</h1><p className="mt-2 text-sm font-bold text-[var(--ink)]/50">يرجى المحاولة مرة أخرى. إذا استمرت المشكلة، استخدم الصفحة الرئيسية.</p><div className="mt-6 flex justify-center gap-2"><button type="button" onClick={reset} className="btn btn-primary px-5 py-3"><RefreshCw className="h-4 w-4"/>إعادة المحاولة</button><Link href="/" className="btn btn-outline px-5 py-3"><Home className="h-4 w-4"/>الرئيسية</Link></div></section></main>}
