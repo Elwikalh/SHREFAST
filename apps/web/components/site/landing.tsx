@@ -20,10 +20,11 @@ import {
 } from "lucide-react";
 import styles from "./site.module.css";
 import { ShareFastMark } from "../brand/share-fast-mark";
+import { ShareFastWordmark } from "../brand/share-fast-wordmark";
 export function Brand() {
  return <Link href="/" className={styles.brand} dir="ltr" aria-label="SHARE FAST — الرئيسية">
   <span className={styles.brandMark}><ShareFastMark /></span>
-  <span className={styles.wordmark}><span>SHARE</span><span className={styles.wordmarkFast}>FAST</span></span>
+  <ShareFastWordmark className={styles.wordmark} />
  </Link>;
 }
 export default function Landing() {

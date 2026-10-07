@@ -5,6 +5,7 @@ import * as ReactNamespace from "react";
 import * as jsxRuntime from "react/jsx-runtime";
 import S from "./icon";
 import { ShareFastMark } from "../brand/share-fast-mark";
+import { ShareFastWordmark } from "../brand/share-fast-wordmark";
 const we = ReactNamespace;
 var su = ReactNamespace;
 var z = jsxRuntime;
@@ -18,7 +19,7 @@ function q0({ logo: e, name: a, role: t, nav: l, cur: u, go: o, footNote: n }) {
 					(0, z.jsx)("div", { className: "logo", children: e }),
 					(0, z.jsxs)("div", {
 						children: [
-							(0, z.jsx)("b", { children: a }),
+							(0, z.jsx)("b", { "aria-label": a === "SHARE FAST" ? a : undefined, children: a === "SHARE FAST" ? jsxRuntime.jsx(ShareFastWordmark, { className: "portal-wordmark" }) : a }),
 							(0, z.jsx)("small", { children: t }),
 						],
 					}),
@@ -581,7 +582,7 @@ function qu({ icon: e = "box", title: a, sub: t, children: l }) {
 				},
 				children: (0, z.jsx)(S, { n: e, s: 24 }),
 			}),
-			(0, z.jsx)("b", { children: a }),
+			(0, z.jsx)("b", { "aria-label": a === "SHARE FAST" ? a : undefined, children: a === "SHARE FAST" ? jsxRuntime.jsx(ShareFastWordmark, { className: "portal-wordmark" }) : a }),
 			t &&
 				(0, z.jsx)("div", {
 					className: "sub",

@@ -1,9 +1,4 @@
-/** Two shared origins converge into one forward route: the SHARE FAST brand mark. */
-export function ShareFastMark({ size = 32, className }: { size?: number; className?: string }) {
- return <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className} aria-hidden="true" focusable="false" data-testid="share-fast-mark">
-  <path d="M12 12h5l9 12h11M12 36h5l9-12" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-  <path d="m31 17 7 7-7 7" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-  <circle cx="9" cy="12" r="3.5" fill="currentColor"/>
-  <circle cx="9" cy="36" r="3.5" fill="currentColor"/>
- </svg>;
+/** Shared routes feed a delivery motorcycle, replacing the old generic arrowhead. */
+export function ShareFastMark({ size = 36, className }: { size?: number; className?: string }) {
+ return <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden="true" focusable="false" data-testid="share-fast-mark" data-brand-version="delivery-v2"><path d="M12 13h5l8 13M12 38h6l7-12" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="13" r="3" fill="currentColor"/><circle cx="9" cy="38" r="3" fill="currentColor"/><rect x="25" y="20" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="3"/><path d="M30 23v5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/><path d="M32 35h12" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round"/><path d="M32 38h12l-7 10H27Z" fill="currentColor"/><path d="M46 20h7l6 7h-9l5 21" fill="none" stroke="currentColor" strokeWidth="3.3" strokeLinecap="round" strokeLinejoin="round"/><circle cx="28" cy="49" r="5.5" fill="none" stroke="currentColor" strokeWidth="3"/><circle cx="54" cy="49" r="5.5" fill="none" stroke="currentColor" strokeWidth="3"/></svg>;
 }

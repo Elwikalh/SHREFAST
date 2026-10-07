@@ -1472,3 +1472,11 @@
 .brandMark{border-radius:11px;flex-shrink:0}.brandMark svg{display:block}
 @media(max-width:480px){.wordmark{font-size:16px;gap:4px;letter-spacing:.2px}.brand{gap:9px}.brandMark{width:36px;height:36px;border-radius:9px}.brandMark svg{width:29px;height:29px}}
 @media(max-width:360px){.headerInner{padding-inline:12px;gap:8px}.headerActions{gap:8px}.smallPrimary{padding-inline:9px}.wordmark{font-size:15px}.headerInner .brand{gap:7px}}
+
+/* Bespoke vector wordmark: faceted SHARE and forward-leaning FAST. */
+.wordmark{display:block;width:158px;height:auto;overflow:visible;flex-shrink:0;color:var(--text)}
+.brandMark svg{width:36px;height:36px}
+@media(max-width:480px){.wordmark{width:114px;height:auto}.brandMark{width:38px;height:38px}.brandMark svg{width:33px;height:33px}.brand{gap:8px}}
+@media(max-width:360px){.wordmark{width:103px}.brandMark{width:34px;height:34px}.brandMark svg{width:30px;height:30px}}
+@media(max-width:480px){.headerInner .wordmark{width:106px}.headerInner .brand{gap:7px}.headerInner .brandMark{width:36px;height:36px}.headerActions{gap:8px}}
+@media(max-width:360px){.headerInner{flex-wrap:wrap;row-gap:12px}.headerInner .wordmark{width:126px}.headerActions{width:100%;justify-content:space-between}}

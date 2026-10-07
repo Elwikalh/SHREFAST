@@ -1914,3 +1914,7 @@ textarea {
 .brand .logo{background:#067567;border-radius:10px;box-shadow:none}.brand .logo svg,.avatar svg{display:block;flex-shrink:0}
 
 .avatar:has([data-testid="share-fast-mark"]){background:#067567;color:#fff;box-shadow:none}
+
+.portal-wordmark{width:142px;height:auto;display:block;color:#fff;--accent:#79d7bc;overflow:visible}
+.brand b:has(.portal-wordmark){display:block;line-height:1}
+.brand b:has(.portal-wordmark)+small{margin-top:6px;font-size:14px;line-height:1.45;color:#9dadc6}
