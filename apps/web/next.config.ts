@@ -9,5 +9,5 @@ const securityHeaders=[
 	{key:"Cross-Origin-Opener-Policy",value:"same-origin"},
 	{key:"Strict-Transport-Security",value:"max-age=31536000; includeSubDomains"},
 ]
-const nextConfig:NextConfig={output:"standalone",outputFileTracingRoot:path.join(__dirname,"../.."),transpilePackages:["@el7bboB/core","@el7bboB/db"],poweredByHeader:false,compress:true,async headers(){return[{source:"/(.*)",headers:securityHeaders}]}}
+const nextConfig:NextConfig={output:"standalone",outputFileTracingRoot:path.join(__dirname,"../.."),transpilePackages:["@el7bboB/core","@el7bboB/db"],poweredByHeader:false,compress:true,async headers(){return[{source:"/(.*)",headers:securityHeaders}]},async redirects(){return[{source:"/",destination:"/wasl/index.html",permanent:false}]}}
 export default nextConfig
