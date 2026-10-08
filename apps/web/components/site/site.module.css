@@ -1696,3 +1696,31 @@
 @media(max-width:1200px) and (min-width:801px){.deviceSection{margin-inline:32px;padding:32px;gap:32px;grid-template-columns:1fr 1.1fr}.devicePanels{grid-template-columns:1fr}.deviceIntro h2{font-size:30px}.devicePanel{padding:20px}.roleTop{flex-wrap:wrap}}
 @media(max-width:800px){.deviceSection{margin:0 24px 48px;padding:32px;grid-template-columns:1fr;gap:32px}.deviceIntro h2{font-size:30px}.devicePanels{grid-template-columns:1fr 1fr}.deviceIntro .primary{width:100%}.roleTop{margin-bottom:20px}}
 @media(max-width:480px){.deviceSection{margin:0 20px 40px;padding:24px}.deviceIntro h2{font-size:28px}.devicePanels{grid-template-columns:1fr}.devicePanel{padding:24px}.devicePanel p{font-size:16px}.solutionCard h3{font-size:21px}.roleActions a{font-size:16px}.roleActions .roleInstall{font-size:14px}.deviceBadge{font-size:14px}}
+
+/* Device-aware install: one primary action, help only when needed. */
+.installCompact { max-width: 640px; padding-top: 24px; }
+.installCompact .installSurface { padding: 32px; }
+.installDevice { display: flex; align-items: center; gap: 10px; color: var(--accent); font-size: 14px; font-weight: 700; margin-bottom: 24px; }
+.installCompact h1 { font-size: 36px; line-height: 1.45; font-weight: 800; margin: 0 0 20px; }
+.installCompact h1 span { color: var(--accent); }
+.installLead { color: var(--muted); font-size: 16px; line-height: 1.9; margin: 0; }
+.installCompact .installActions { margin-top: 20px; }
+.installFootnote { color: var(--muted); font-size: 14px; line-height: 1.8; margin: 12px 0 0; }
+.installQuickHelp { margin-top: 24px; padding: 20px; background: var(--accent-soft); border: 1px solid var(--border); border-radius: 10px; }
+.installQuickHelp h2 { font-size: 20px; margin-bottom: 12px; }
+.installQuickHelp p { font-size: 14px; color: var(--muted); line-height: 1.8; margin: 0; }
+.installSteps { display: grid; gap: 16px; list-style: none; margin: 20px 0; padding: 0; }
+.installSteps li { display: flex; gap: 12px; align-items: start; font-size: 16px; line-height: 1.8; }
+.installSteps svg { color: var(--accent); flex-shrink: 0; margin-top: 4px; }
+.installAccount { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.installAccount h2 { font-size: 18px; margin-bottom: 16px; }
+.installAccountRoles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.installAccountRoles button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; padding: 12px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 14px; font-weight: 700; line-height: 1.6; }
+.installAccountRoles svg { flex-shrink: 0; color: var(--accent); }
+.installAccountRoles .installSelected { background: var(--accent-soft); border-color: var(--accent); }
+.installAccount .fieldNote { margin-top: 16px; }
+.installCompact .installSecurity { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; color: var(--muted); }
+.installCompact .installSecurity p { font-size: 14px; line-height: 1.8; margin: 0; }
+.installCompact .installSecurity svg { color: var(--accent); }
+@media(max-width:480px){.installCompact{padding:16px 20px 40px}.installCompact .installSurface{padding:24px 20px}.installCompact h1{font-size:30px}.installAccountRoles button{flex-direction:column;gap:4px}.installQuickHelp{padding:16px}}
+.installCompact .primary { font-weight: 700; }
