@@ -257,3 +257,13 @@ test("header is readable and compact navigation supports keyboard closing", asyn
   expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
  }
 });
+
+
+test("landing makes restaurant, company and courier device availability explicit",async({page})=>{
+ await page.goto("/");
+ for(const title of ["مطعم أو نشاط تجاري","شركة توصيل"]){const card=page.locator("article").filter({has:page.getByRole("heading",{name:title,exact:true})});await expect(card.getByText("موبايل + كمبيوتر",{exact:true})).toBeVisible();await expect(card.getByRole("link",{name:/تثبيت تطبيق/})).toHaveAttribute("href",title==="شركة توصيل"?"/app?role=company":"/app?role=merchant")}
+ const courier=page.locator("article").filter({has:page.getByRole("heading",{name:"مندوب توصيل",exact:true})});await expect(courier.getByText("تطبيق للموبايل",{exact:true})).toBeVisible();
+ await expect(page.getByRole("heading",{name:"حساب واحد. على الموبايل والكمبيوتر.",exact:true})).toBeVisible();
+ await page.getByText("هل تطبيق المطعم والشركة للموبايل أم للكمبيوتر؟",{exact:true}).click();await expect(page.getByText("متاح للموبايل والكمبيوتر معًا.",{exact:false})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+});

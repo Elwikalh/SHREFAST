@@ -1665,3 +1665,34 @@
 .optionalDetails > .field:last-child { margin-bottom: 0; }
 
 @media(max-width:800px){.registerPage .authAside{display:none}.registerPage .authGrid{padding-top:16px}.registerPage .authForm{padding-top:0}}
+
+/* Role-led landing: clear device availability and one-account continuity. */
+.heroNotes { flex-direction: column; gap: 10px; }
+.roleTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+.roleTop .solutionIcon { margin: 0; }
+.deviceBadge { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--soft); padding: 6px 10px; border-radius: 6px; color: var(--text); font-size: 14px; font-weight: 700; line-height: 1.5; }
+.deviceBadge svg { flex-shrink: 0; color: var(--accent); }
+.solutionCard { display: flex; flex-direction: column; }
+.solutionCard h3 { font-size: 21px; line-height: 1.6; margin-bottom: 12px; }
+.solutionCard > p { margin-bottom: 24px; }
+.roleActions { display: grid; gap: 8px; margin-top: auto; }
+.roleActions a { display: flex; justify-content: space-between; gap: 10px; font-size: 16px; min-height: 48px; margin: 0; padding: 10px 14px; border-radius: 8px; }
+.roleActions .rolePrimary { background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+.roleActions .rolePrimary:hover { box-shadow: inset 0 0 0 1px var(--accent); }
+.roleActions .roleInstall { color: var(--muted); font-size: 14px; justify-content: center; }
+.roleActions .roleInstall:hover { color: var(--accent); }
+.deviceSection { max-width: 1136px; margin: 0 auto 64px; padding: 48px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; align-items: center; background: var(--soft); border: 1px solid var(--border); border-radius: 12px; scroll-margin-top: 24px; }
+.deviceIntro h2 { font-size: 34px; line-height: 1.5; font-weight: 800; margin: 20px 0; }
+.deviceIntro > p { color: var(--muted); font-size: 16px; line-height: 1.9; margin-bottom: 24px; }
+.devicePanels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.devicePanel { background: var(--surface); padding: 24px; border: 1px solid var(--border); border-radius: 10px; }
+.deviceIcon { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; background: var(--accent-soft); color: var(--accent); border-radius: 10px; margin-bottom: 20px; }
+.devicePanel h3 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+.devicePanel p { font-size: 15px; line-height: 1.9; color: var(--muted); margin-bottom: 20px; }
+.deviceAudience { display: block; padding-top: 16px; border-top: 1px solid var(--border); color: var(--accent); font-size: 14px; font-weight: 700; }
+.deviceAssurance { grid-column: 1 / -1; display: flex; gap: 10px; align-items: flex-start; padding: 12px 0 0; }
+.deviceAssurance svg { flex: none; color: var(--accent); margin-top: 4px; }
+.deviceAssurance p { color: var(--muted); font-size: 14px; line-height: 1.8; }
+@media(max-width:1200px) and (min-width:801px){.deviceSection{margin-inline:32px;padding:32px;gap:32px;grid-template-columns:1fr 1.1fr}.devicePanels{grid-template-columns:1fr}.deviceIntro h2{font-size:30px}.devicePanel{padding:20px}.roleTop{flex-wrap:wrap}}
+@media(max-width:800px){.deviceSection{margin:0 24px 48px;padding:32px;grid-template-columns:1fr;gap:32px}.deviceIntro h2{font-size:30px}.devicePanels{grid-template-columns:1fr 1fr}.deviceIntro .primary{width:100%}.roleTop{margin-bottom:20px}}
+@media(max-width:480px){.deviceSection{margin:0 20px 40px;padding:24px}.deviceIntro h2{font-size:28px}.devicePanels{grid-template-columns:1fr}.devicePanel{padding:24px}.devicePanel p{font-size:16px}.solutionCard h3{font-size:21px}.roleActions a{font-size:16px}.roleActions .roleInstall{font-size:14px}.deviceBadge{font-size:14px}}
