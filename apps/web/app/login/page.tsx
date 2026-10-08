@@ -4,12 +4,13 @@ export const metadata = { title: "تسجيل الدخول — SHARE FAST" };
 export default async function Login({
 	searchParams,
 }: {
-	searchParams: Promise<{ role?: string }>;
+	searchParams: Promise<{ role?: string; intent?: string }>;
 }) {
-	const { role } = await searchParams;
+	const { role, intent } = await searchParams;
 	return (
 		<AuthForm
 			mode="login"
+            requestIntent={intent === "request"}
 			initialRole={
 				["merchant", "company", "courier", "admin"].includes(role || "")
 					? (role as Principal["role"])

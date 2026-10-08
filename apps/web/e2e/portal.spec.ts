@@ -54,7 +54,7 @@ test("landing is RTL, responsive, with Lucide and real registration links", asyn
 	const errors: string[] = [];
 	page.on("pageerror", (e) => errors.push(e.message));
 	await page.goto("/");
-	await expect(page.getByRole("heading", { level: 1 })).toContainText("كل طلب");
+	await expect(page.getByRole("heading", { level: 1 })).toContainText("طلبك جاهز");
 	await expect(page.locator("svg.lucide:visible").first()).toBeVisible();
 	await expect(page.getByText("معاينة توضيحية", { exact: true })).toBeVisible();
 	expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
@@ -65,8 +65,8 @@ test("landing is RTL, responsive, with Lucide and real registration links", asyn
 	).toBe(true);
 	await page.locator("details").first().locator("summary").click();
 	await expect(page.locator("details[open]")).toHaveCount(1);
-	await page.locator('a[href="/register"]').first().click();
-	await expect(page).toHaveURL(/\/register$/);
+	await page.locator('a[href="/register?role=merchant&intent=request"]').first().click();
+	await expect(page).toHaveURL(/\/register\?role=merchant&intent=request$/);
 	expect(errors).toEqual([]);
 });
 test("simple registration validates details, preserves them backwards, and stops mismatched passwords", async ({page}) => {
@@ -245,12 +245,12 @@ test("header is readable and compact navigation supports keyboard closing", asyn
  if ((page.viewportSize()?.width || 1440) <= 800) {
   await button.click();
   await expect(button).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("link", { name: "خطوات التسجيل", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "كيف تطلب؟", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(button).toHaveAttribute("aria-expanded", "false");
   await expect(button).toBeFocused();
  }
- for (const label of ["تسجيل الدخول", "حساب جديد"]) {
+ for (const label of ["تسجيل الدخول", "اطلب مندوب"]) {
   const link = page.locator("header").getByRole("link", { name: label, exact: true });
   await expect(link).toBeVisible();
   expect(await link.evaluate(e => parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(16);

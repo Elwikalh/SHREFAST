@@ -1,13 +1,15 @@
-import Image from "next/image";
+import { ShareFastMark } from "../brand/share-fast-mark";
 import SiteMotion from "./site-motion";
 import Link from "next/link";
 import {
 	ArrowLeft,
 	Bike,
 	Building2,
-	Check,
 	ChevronDown,
 	CircleCheck,
+    MapPin,
+    Phone,
+    PackageCheck,
 	Monitor,
 	Smartphone,
 	Download,
@@ -23,7 +25,7 @@ import SiteHeader from "./header";
 export { Brand } from "./brand";
 export default function Landing() {
 	return (
-		<SiteMotion className={`${styles.site} ${styles.polishedSite}`}>
+		<SiteMotion className={`${styles.site} ${styles.polishedSite} ${styles.merchantLanding}`}>
 			<a href="#main-content" className={styles.skip}>
 				انتقل للمحتوى
 			</a>
@@ -32,46 +34,39 @@ export default function Landing() {
 				<section className={styles.hero}>
 					<div className={styles.heroCopy}>
 						<span className={styles.eyebrow}>
-							<span className={styles.statusDot} /> إدارة التوصيل، ببساطة
+							<span className={styles.statusDot} /> للمطاعم والأنشطة التجارية
 						</span>
 						<h1>
-							كل طلب،
+							طلبك جاهز؟
 							<br />
-							<span>تحت السيطرة.</span>
+							<span>اطلب مندوب.</span>
 						</h1>
 						<p className={styles.heroDescription}>
-							من أول طلب لآخر تسليم، اجمع نشاطك وفريق التوصيل في تجربة واحدة. أنشئ الطلبات، نظّم فريقك، وتابع كل مرحلة من الموبايل أو الكمبيوتر.
+							سجّل عنوان مطعمك مرة واحدة. بعد كده، أضف بيانات العميل، شوف رسوم التوصيل، وأكّد الطلب — من الموبايل أو الكمبيوتر.
 						</p>
 						<div className={styles.ctaRow}>
-							<Link href="/register" className={styles.primary}>
-								أنشئ حسابك <ArrowLeft size={19} />
+							<Link href="/request" className={styles.primary}>
+                                اطلب مندوب <Bike size={19} />
 							</Link>
-							<Link href="/app" className={styles.secondary}>
-                                ثبّت التطبيق <Download size={18} />
+							<Link href="/register?role=merchant&intent=request" className={styles.secondary}>
+                                سجّل مطعمك <ArrowLeft size={18} />
                             </Link>
 						</div>
 						<div className={styles.heroNotes}>
 							<span>
-								<Monitor size={17} /> المطعم والشركة: موبايل وكمبيوتر
+								<Monitor size={17} /> موبايل وكمبيوتر، نفس الحساب
 							</span>
 							<span>
-								<Smartphone size={17} /> المندوب: تطبيق للموبايل
+								<ShieldCheck size={17} /> الرسوم واضحة قبل التأكيد
 							</span>
 						</div>
 					</div>
-                    <div className={styles.heroArt}>
-                        <div className={styles.heroPhoto}>
-                            <Image src="/media/delivery-scene.svg" alt="مشهد توضيحي لمندوب يستلم طلبًا من مطعم بجوار موتوسيكل توصيل" fill unoptimized preload sizes="(max-width: 800px) 100vw, 600px" />
-                            <span className={styles.photoCaption}>من نشاطك… إلى باب عميلك.</span>
-                        </div>
-                        <div className={styles.journeyCard} aria-label="معاينة توضيحية لمراحل التوصيل">
-                            <div className={styles.journeyHeading}><span><Route size={20} /> كل خطوة، في مكانها.</span><span className={styles.journeyLabel}>معاينة توضيحية</span></div>
-                            <div className={styles.journeyTrack}>
-                                <div><Store size={22} /><span>طلب جديد</span></div><span className={styles.journeyLine} />
-                                <div><Bike size={22} /><span>استلام وتوصيل</span></div><span className={styles.journeyLine} />
-                                <div><CircleCheck size={22} /><span>تسليم الطلب</span></div>
-                            </div>
-                        </div>
+                    <div className={`${styles.heroArt} ${styles.requestBanner}`} aria-label="بنر طلب مندوب من المطعم إلى العميل">
+                        <div className={styles.bannerTop}><span>SHARE FAST</span><span>طلب سريع. متابعة واضحة.</span></div>
+                        <h2>من مطعمك،<br /><span>لباب العميل.</span></h2>
+                        <div className={styles.bannerRoute} aria-hidden="true"><div className={styles.bannerStop}><Store size={30} /><span>مطعمك</span></div><span className={styles.bannerConnector} /><div className={styles.bannerMark}><ShareFastMark size={118} /></div><span className={styles.bannerConnector} /><div className={styles.bannerStop}><MapPin size={30} /><span>العميل</span></div></div>
+                        <div className={styles.bannerBottom}><div><b>عنوان مطعمك محفوظ.</b><p>ابدأ طلبك من غير ما تعيد بيانات نشاطك.</p></div><PackageCheck size={28} /></div>
+                        <div className={styles.bannerDisclaimer}><span>معاينة توضيحية</span><span>القبول حسب التغطية وتوافر المناديب.</span></div>
                     </div>
 				</section>
 				<section className={styles.valueStrip} aria-label="مميزات التجربة">
@@ -97,6 +92,10 @@ export default function Landing() {
 						</span>
 					</div>
 				</section>
+                <section className={styles.restaurantBanner} data-reveal aria-labelledby="work-story-title">
+                    <div><span className={styles.eyebrow}>بسيطة من أول طلب</span><h2 id="work-story-title">وقت المطبخ للمطبخ.<br />وطلب المندوب في 3 بيانات.</h2><p>عنوان الاستلام من حساب مطعمك. المطلوب لكل أوردر هو بيانات العميل فقط، ثم مراجعة الرسوم وتأكيد الإرسال.</p><Link href="/request" className={styles.primary}>افتح طلب مندوب <ArrowLeft size={19} /></Link></div>
+                    <div className={styles.bannerFields}><ol><li><span>01</span><Phone size={22} /><b>رقم موبايل العميل</b></li><li><span>02</span><MapPin size={22} /><b>منطقة التسليم</b></li><li><span>03</span><Store size={22} /><b>العنوان بالتفصيل</b></li></ol><div className={styles.bannerConfirm}><CircleCheck size={22} /><span>راجع الرسوم. تأكيد واحد لإرسال الطلب.</span></div></div>
+                </section>
 				<section id="solutions" className={styles.section}>
 					<div className={styles.sectionIntro} data-reveal>
 						<span className={styles.eyebrow}>مصممة لطبيعة عملك</span>
@@ -126,16 +125,6 @@ export default function Landing() {
                         ))}
                     </div>
                 </section>
-                <section className={styles.workStory} data-reveal aria-labelledby="work-story-title">
-                    <div className={styles.storyMedia}><Image src="/media/business-scene.svg" alt="مشهد توضيحي لصاحب مطعم يتابع عمله بجوار طلبات جاهزة للتوصيل" fill unoptimized sizes="(max-width: 800px) 100vw, 560px" /></div>
-                    <div className={styles.storyCopy}>
-                        <span className={styles.eyebrow}>ركّز على شغلك. ورتّب توصيلك.</span>
-                        <h2 id="work-story-title">من وراء الكاونتر،<br />إلى آخر نقطة تسليم.</h2>
-                        <p>بدل متابعة الطلبات في أكثر من مكان، اجمع حالة الطلب والفريق المكلّف به في لوحة تناسب طبيعة حسابك.</p>
-                        <ul><li><Check size={20} /> طلبات واضحة لنشاطك</li><li><Check size={20} /> توزيع ومتابعة لشركة التوصيل</li><li><Check size={20} /> مهام محددة للمندوب</li></ul>
-                        <Link href="/register" className={styles.storyLink}>ابدأ بالحساب المناسب لك <ArrowLeft size={19} /></Link>
-                    </div>
-                </section>
                 <section id="devices" className={styles.deviceSection} data-reveal aria-labelledby="devices-title">
                     <div className={styles.deviceIntro}>
                         <span className={styles.eyebrow}>للمطاعم والأنشطة وشركات التوصيل</span>
@@ -153,30 +142,30 @@ export default function Landing() {
 					<div className={styles.howHeading}>
 						<span className={styles.eyebrow}>بداية واضحة</span>
 						<h2>
-							بداية بسيطة.
+							من الطلب الجاهز،
 							<br />
-							وحساب يكمل معك.
+							إلى متابعة المندوب.
 						</h2>
 						<p>
-							بيانات أساسية فقط عند التسجيل. تفاصيل التشغيل يمكن إعدادها بعد إنشاء الحساب.
+							الزر يفتح نموذج الطلب مباشرة لحساب المطعم المسجّل. لو دي أول مرة، سجّل نشاطك وعنوانه ثم أكمل طلبك.
 						</p>
-						<Link href="/register" className={styles.secondary}>
-							ابدأ التسجيل <ArrowLeft size={18} />
+						<Link href="/request" className={styles.secondary}>
+                            افتح طلب مندوب <ArrowLeft size={18} />
 						</Link>
 					</div>
 					<ol className={styles.steps}>
 						{[
 							{
-								title: "اختر نوع حسابك",
-								text: "نشاط تجاري، شركة توصيل، أو مندوب. نعرض لك فقط البيانات المناسبة لدورك.",
+								title: "افتح طلب مندوب",
+								text: "اضغط الزر من الموقع. لو أنت مسجّل دخول، يفتح طلبك بعنوان نشاطك المحفوظ.",
 							},
 							{
-								title: "سجّل برقم الموبايل",
-                                text: "أضف بيانات حسابك الأساسية وأنشئ كلمة مرور. المندوب يبدأ التسجيل من تطبيق الموبايل.",
+								title: "أضف بيانات العميل",
+                                text: "رقم الموبايل، منطقة التسليم، والعنوان بالتفصيل. وقت التحضير اختياري لو الطلب مش جاهز.",
 							},
 							{
-								title: "افتح لوحتك على جهازك",
-                                text: "ثبّت التطبيق أو استخدم المتصفح. البيانات مرتبطة بحسابك، وليست بالجهاز الذي سجّلت منه.",
+								title: "راجع الرسوم وأكّد",
+                                text: "شوف رسوم التوصيل قبل إرسال الطلب، وبعد التسجيل تابع حالة القبول والتوصيل من حسابك.",
 							},
 						].map((step, i) => (
 							<li key={step.title}>
@@ -246,12 +235,12 @@ export default function Landing() {
 						<Sparkles size={16} /> خطوتك التالية
 					</span>
 					<h2>
-						ابدأ اليوم.
+						أوردر جديد؟
 						<br />
-						نظّم توصيلك من مكان واحد.
+						اطلب مندوب من مكانك.
 					</h2>
-					<Link href="/register" className={styles.primary}>
-						إنشاء حساب جديد <ArrowLeft size={19} />
+					<Link href="/request" className={styles.primary}>
+                        اطلب مندوب الآن <ArrowLeft size={19} />
 					</Link>
 				</section>
 			</main>

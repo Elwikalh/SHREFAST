@@ -76,10 +76,12 @@ export default function AuthForm({
 	mode,
 	initialRole = "merchant",
 	skipRoleSelection = false,
+    requestIntent = false,
 }: {
 	mode: "register" | "login";
 	initialRole?: AccountRole | "admin";
 	skipRoleSelection?: boolean;
+    requestIntent?: boolean;
 }) {
 	const router = useRouter();
 	const registering = mode === "register",
@@ -181,7 +183,7 @@ export default function AuthForm({
 				return;
 			}
 			// Session is in an HttpOnly cookie. Never persist credentials or a token in localStorage.
-			router.replace("/wasl");
+			router.replace(requestIntent && role === "merchant" ? "/request" : "/wasl");
 			router.refresh();
 		} catch {
 			setError(
@@ -564,7 +566,7 @@ export default function AuthForm({
                         <p className={styles.authSwitch}>
 							{registering ? "لديك حساب بالفعل؟" : "ليس لديك حساب؟"}
 							<Link
-								href={`${registering ? "/login" : "/register"}?role=${role === "admin" ? "merchant" : role}`}
+								href={`${registering ? "/login" : "/register"}?role=${role === "admin" ? "merchant" : role}${requestIntent ? "&intent=request" : ""}`}
 							>
 								{registering ? "تسجيل الدخول" : "إنشاء حساب"}
 							</Link>

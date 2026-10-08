@@ -3798,6 +3798,7 @@ var d = jsxRuntime,
 	},
 	g2 = Hu.filter((e) => e.aff === "m1");
 function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
+ const router = useRouter();
 	qm.some((L) => L.items.some((q) => q.id === e)) || (e = "home");
 	let {
 			orders: o,
@@ -4402,7 +4403,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 					sub: "لوحة يومية لإدارة توصيل مطعمك",
 					children: (0, d.jsxs)("button", {
 						className: "btn btn-p btn-sm",
-						onClick: () => a("newreq"),
+						onClick: () => router.push("/request"),
 						children: [(0, d.jsx)(S, { n: "zap", s: 14 }), " طلب مندوب"],
 					}),
 				}),
@@ -4706,7 +4707,7 @@ function cf({ cur: e, go: a, store: t, initialRef: l = "", onHasPool: u }) {
 								children: [
 									(0, d.jsxs)("button", {
 										className: "btn btn-p btn-lg",
-										onClick: () => a("newreq"),
+										onClick: () => router.push("/request"),
 										children: [(0, d.jsx)(S, { n: "zap" }), " طلب مندوب الآن"],
 									}),
 									(0, d.jsx)("div", { style: { height: 10 } }),

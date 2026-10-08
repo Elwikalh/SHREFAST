@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { AlertCircle, LoaderCircle, LogOut, RotateCcw } from "lucide-react";
 import type { Principal } from "@/lib/wasl-auth";
 import { apiFetch } from "@/lib/wasl-api";
+import QuickRequest from "./quick-request";
 const Portal = dynamic(() => import("./portal"), {
 	ssr: false,
 	loading: () => (
@@ -15,7 +16,7 @@ const Portal = dynamic(() => import("./portal"), {
 		</main>
 	),
 });
-export default function WaslClient() {
+export default function WaslClient({ quickRequest = false }: { quickRequest?: boolean }) {
 	const router = useRouter();
 	const [user, setUser] = useState<Principal | null>(null),
 		[error, setError] = useState(false),
@@ -25,7 +26,7 @@ export default function WaslClient() {
 		apiFetch("/api/wasl/auth/me", { signal: controller.signal })
 			.then(async (response) => {
 				if (response.status === 401) {
-					router.replace("/login");
+					router.replace(quickRequest ? "/login?role=merchant&intent=request" : "/login");
 					return;
 				}
 				if (!response.ok) throw new Error("unavailable");
@@ -45,7 +46,7 @@ export default function WaslClient() {
 				if (!controller.signal.aborted) setError(true);
 			});
 		return () => controller.abort();
-	}, [retry, router]);
+	}, [retry, router, quickRequest]);
 	async function logout() {
 		try {
 			const response = await apiFetch("/api/wasl/auth/logout", {
@@ -83,6 +84,8 @@ export default function WaslClient() {
 				الدخول...
 			</main>
 		);
+
+ if (quickRequest) return user.role === "merchant" ? <QuickRequest principal={user} /> : <main className="portal-loading"><div>طلب مندوب متاح من حساب مطعم أو نشاط تجاري.</div><Link href="/wasl">العودة إلى لوحة حسابك</Link></main>;
 	return (
 		<>
 			<div className="account-session-bar">

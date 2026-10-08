@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Menu, X } from "lucide-react";
+import { ArrowLeft, Bike, Menu, X } from "lucide-react";
 import { Brand } from "./brand";
 import styles from "./site.module.css";
 const links = [
  { href: "#solutions", label: "خدماتنا" },
- { href: "#how", label: "خطوات التسجيل" },
+ { href: "#how", label: "كيف تطلب؟" },
  { href: "#faq", label: "المساعدة" },
  { href: "/app", label: "التطبيق" },
 ];
@@ -32,7 +32,7 @@ export default function SiteHeader() {
    </nav>
    <div className={styles.headerActions}>
     <Link href="/login" className={styles.headerLogin}>تسجيل الدخول</Link>
-    <Link href="/register" className={styles.smallPrimary}>حساب جديد <ArrowLeft size={17} /></Link>
+    <Link href="/request" className={styles.smallPrimary}>اطلب مندوب <Bike size={17} /></Link>
    </div>
   </div>
  </header>;
