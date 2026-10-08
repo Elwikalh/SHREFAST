@@ -1,4 +1,4 @@
-/** The shared arrow ends in only the motorcycle's front: handlebar, headlamp, fork and wheel. */
+/** Approved forward-motion geometric identity; one shared mark across every surface. */
 export function ShareFastMark({ size = 36, className }: { size?: number; className?: string }) {
- return <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden="true" focusable="false" data-testid="share-fast-mark" data-brand-version="front-only-v3"><path d="M16 18h7l10 14M16 46h7l10-14h15" fill="none" stroke="currentColor" strokeWidth="3.8" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="18" r="3.2" fill="currentColor"/><circle cx="12" cy="46" r="3.2" fill="currentColor"/><path d="M37 12h13l10 11H45l7 24" fill="none" stroke="currentColor" strokeWidth="3.8" strokeLinecap="round" strokeLinejoin="round"/><circle cx="52" cy="48" r="8" fill="none" stroke="currentColor" strokeWidth="3.8"/></svg>;
+ return <svg width={size} height={size} viewBox="0 0 110 120" className={className} aria-hidden="true" focusable="false" data-testid="share-fast-mark" data-brand-version="forward-v1"><path d="M25 23H85L72 39H37L28 50H68L36 89H9L39 53H1L25 23Z" fill="currentColor"/><path d="M80 50H104L73 89H50L80 50Z" fill="currentColor"/></svg>;
 }

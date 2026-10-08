@@ -1871,3 +1871,6 @@
 @media(prefers-color-scheme:dark){.errorBanner{background:#3d2228;border-color:#aa6672;color:#ffb6bf}}
 .restaurantBanner { margin-top:48px; }
 .quickIntro h1 { color:var(--accent); }
+
+/* Approved geometric identity: unboxed mark for website lockups. */
+.brandMark { background: transparent; color: var(--accent); border-radius: 0; }
