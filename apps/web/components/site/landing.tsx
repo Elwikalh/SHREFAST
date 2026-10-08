@@ -1,3 +1,5 @@
+import Image from "next/image";
+import SiteMotion from "./site-motion";
 import Link from "next/link";
 import {
 	ArrowLeft,
@@ -6,14 +8,9 @@ import {
 	Check,
 	ChevronDown,
 	CircleCheck,
-	Layers3,
-	LockKeyhole,
-	MapPin,
 	Monitor,
 	Smartphone,
 	Download,
-	MoveUpLeft,
-	Package,
 	Route,
 	ShieldCheck,
 	Sparkles,
@@ -26,7 +23,7 @@ import SiteHeader from "./header";
 export { Brand } from "./brand";
 export default function Landing() {
 	return (
-		<div className={styles.site}>
+		<SiteMotion className={`${styles.site} ${styles.polishedSite}`}>
 			<a href="#main-content" className={styles.skip}>
 				انتقل للمحتوى
 			</a>
@@ -43,7 +40,7 @@ export default function Landing() {
 							<span>تحت السيطرة.</span>
 						</h1>
 						<p className={styles.heroDescription}>
-							طلباتك، فريقك، وكل خطوة في التوصيل — في منصة عربية واحدة. افتح لوحة نشاطك أو شركتك من الموبايل والكمبيوتر، بنفس الحساب ونفس البيانات.
+							من أول طلب لآخر تسليم، اجمع نشاطك وفريق التوصيل في تجربة واحدة. أنشئ الطلبات، نظّم فريقك، وتابع كل مرحلة من الموبايل أو الكمبيوتر.
 						</p>
 						<div className={styles.ctaRow}>
 							<Link href="/register" className={styles.primary}>
@@ -62,87 +59,20 @@ export default function Landing() {
 							</span>
 						</div>
 					</div>
-					<div
-						className={styles.productVisual}
-						aria-label="معاينة توضيحية لواجهة إدارة التوصيل"
-					>
-						<div className={styles.visualTop}>
-							<span>
-								<Layers3 size={18} /> لوحة الطلبات
-							</span>
-							<span className={styles.previewTag}>معاينة توضيحية</span>
-						</div>
-						<div className={styles.visualMain}>
-							<div className={styles.visualHeading}>
-								<div>
-									<span className={styles.muted}>متابعة الطلب</span>
-									<h2>متابعة الطلب، خطوة بخطوة</h2>
-								</div>
-								<span className={styles.visualIcon}>
-									<Package size={24} />
-								</span>
-							</div>
-							<div className={styles.previewOrder}>
-								<div className={styles.previewOrderTop}>
-									<span className={styles.orderLabel}>
-										<span className={styles.orderDot} /> طلب توضيحي
-									</span>
-									<span className={styles.orderBadge}>في الطريق</span>
-								</div>
-								<div className={styles.routePoint}>
-									<span className={styles.pointIcon}>
-										<Store size={19} />
-									</span>
-									<div>
-										<small>نقطة الاستلام</small>
-										<b>نشاطك التجاري</b>
-									</div>
-									<CircleCheck size={19} className={styles.positive} />
-								</div>
-								<div className={styles.routeConnector} />
-								<div className={styles.routePoint}>
-									<span className={styles.pointIcon}>
-										<MapPin size={19} />
-									</span>
-									<div>
-										<small>نقطة التسليم</small>
-										<b>عنوان العميل</b>
-									</div>
-									<span className={styles.routeArrow}>
-										<MoveUpLeft size={20} />
-									</span>
-								</div>
-								<div className={styles.previewDivider} />
-								<div className={styles.courierRow}>
-									<span className={styles.courierAvatar}>
-										<Bike size={22} />
-									</span>
-									<div>
-										<b>المندوب المكلّف</b>
-										<small>من الاستلام حتى التسليم</small>
-									</div>
-									<span className={styles.miniStatus}>متابعة الحالة</span>
-								</div>
-							</div>
-							<div className={styles.visualBottom}>
-								<span>
-									<LockKeyhole size={15} /> وصول خاص لحسابك
-								</span>
-								<span>
-									<Route size={16} /> واجهة عربية واضحة
-								</span>
-							</div>
-						</div>
-						<div className={styles.floatingNote}>
-							<span>
-								<Check size={17} />
-							</span>
-							<div>
-								<b>كل التفاصيل أمامك</b>
-								<small>حالة الطلب والمندوب في لوحة واحدة</small>
-							</div>
-						</div>
-					</div>
+                    <div className={styles.heroArt}>
+                        <div className={styles.heroPhoto}>
+                            <Image src="/media/delivery-scene.svg" alt="مشهد توضيحي لمندوب يستلم طلبًا من مطعم بجوار موتوسيكل توصيل" fill unoptimized preload sizes="(max-width: 800px) 100vw, 600px" />
+                            <span className={styles.photoCaption}>من نشاطك… إلى باب عميلك.</span>
+                        </div>
+                        <div className={styles.journeyCard} aria-label="معاينة توضيحية لمراحل التوصيل">
+                            <div className={styles.journeyHeading}><span><Route size={20} /> كل خطوة، في مكانها.</span><span className={styles.journeyLabel}>معاينة توضيحية</span></div>
+                            <div className={styles.journeyTrack}>
+                                <div><Store size={22} /><span>طلب جديد</span></div><span className={styles.journeyLine} />
+                                <div><Bike size={22} /><span>استلام وتوصيل</span></div><span className={styles.journeyLine} />
+                                <div><CircleCheck size={22} /><span>تسليم الطلب</span></div>
+                            </div>
+                        </div>
+                    </div>
 				</section>
 				<section className={styles.valueStrip} aria-label="مميزات التجربة">
 					<div>
@@ -168,7 +98,7 @@ export default function Landing() {
 					</div>
 				</section>
 				<section id="solutions" className={styles.section}>
-					<div className={styles.sectionIntro}>
+					<div className={styles.sectionIntro} data-reveal>
 						<span className={styles.eyebrow}>مصممة لطبيعة عملك</span>
 						<h2>
 							مساحة لكل دور.
@@ -185,7 +115,7 @@ export default function Landing() {
                             { role: "company", icon: Building2, title: "شركة توصيل", devices: "موبايل + كمبيوتر", text: "نظّم العملاء والمناديب ووزّع طلبات التوصيل من لوحة شركتك.", label: "إنشاء حساب الشركة", install: "تثبيت تطبيق الشركة" },
                             { role: "courier", icon: Bike, title: "مندوب توصيل", devices: "تطبيق للموبايل", text: "سجّل من تطبيق الموبايل، وانضم لفريقك وتابع الطلبات المسندة إليك.", label: "تثبيت تطبيق المندوب", install: "لديك حساب؟ تسجيل الدخول" },
                         ].map(({ role, icon: Icon, title, devices, text, label, install }) => (
-                            <article key={role} className={styles.solutionCard}>
+                            <article key={role} className={styles.solutionCard} data-reveal>
                                 <div className={styles.roleTop}><span className={styles.solutionIcon}><Icon size={26} /></span><span className={styles.deviceBadge}>{role === "courier" ? <Smartphone size={16} /> : <Monitor size={16} />}{devices}</span></div>
                                 <h3>{title}</h3><p>{text}</p>
                                 <div className={styles.roleActions}>
@@ -196,7 +126,17 @@ export default function Landing() {
                         ))}
                     </div>
                 </section>
-                <section id="devices" className={styles.deviceSection} aria-labelledby="devices-title">
+                <section className={styles.workStory} data-reveal aria-labelledby="work-story-title">
+                    <div className={styles.storyMedia}><Image src="/media/business-scene.svg" alt="مشهد توضيحي لصاحب مطعم يتابع عمله بجوار طلبات جاهزة للتوصيل" fill unoptimized sizes="(max-width: 800px) 100vw, 560px" /></div>
+                    <div className={styles.storyCopy}>
+                        <span className={styles.eyebrow}>ركّز على شغلك. ورتّب توصيلك.</span>
+                        <h2 id="work-story-title">من وراء الكاونتر،<br />إلى آخر نقطة تسليم.</h2>
+                        <p>بدل متابعة الطلبات في أكثر من مكان، اجمع حالة الطلب والفريق المكلّف به في لوحة تناسب طبيعة حسابك.</p>
+                        <ul><li><Check size={20} /> طلبات واضحة لنشاطك</li><li><Check size={20} /> توزيع ومتابعة لشركة التوصيل</li><li><Check size={20} /> مهام محددة للمندوب</li></ul>
+                        <Link href="/register" className={styles.storyLink}>ابدأ بالحساب المناسب لك <ArrowLeft size={19} /></Link>
+                    </div>
+                </section>
+                <section id="devices" className={styles.deviceSection} data-reveal aria-labelledby="devices-title">
                     <div className={styles.deviceIntro}>
                         <span className={styles.eyebrow}>للمطاعم والأنشطة وشركات التوصيل</span>
                         <h2 id="devices-title">حساب واحد.<br />{" "}على الموبايل والكمبيوتر.</h2>
@@ -204,12 +144,12 @@ export default function Landing() {
                         <Link href="/app" className={styles.primary}>تثبيت التطبيق <Download size={18} /></Link>
                     </div>
                     <div className={styles.devicePanels}>
-                        <div className={styles.devicePanel}><span className={styles.deviceIcon}><Smartphone size={30} /></span><h3>على الموبايل</h3><p>ثبّت التطبيق على Android أو iPhone، وافتح لوحة حسابك من أيقونة SHARE FAST.</p><span className={styles.deviceAudience}>للمطعم والنشاط وشركة التوصيل</span></div>
-                        <div className={styles.devicePanel}><span className={styles.deviceIcon}><Monitor size={30} /></span><h3>على الكمبيوتر</h3><p>ثبّته من Chrome أو Edge، واستخدم لوحة التحكم في نافذة مستقلة على سطح المكتب.</p><span className={styles.deviceAudience}>نفس الحساب. نفس البيانات.</span></div>
+                        <div className={styles.devicePanel}><span className={styles.deviceIcon}><Smartphone size={30} /></span><h3>على الموبايل</h3><p>لوحة نشاطك أو شركتك على الموبايل. تابع الطلبات أينما كنت، بنفس بيانات حسابك.</p><span className={styles.deviceAudience}>للمطعم والنشاط وشركة التوصيل</span></div>
+                        <div className={styles.devicePanel}><span className={styles.deviceIcon}><Monitor size={30} /></span><h3>على الكمبيوتر</h3><p>مساحة أوضح لإدارة الطلبات والفريق، في نافذة مستقلة على سطح المكتب.</p><span className={styles.deviceAudience}>نفس الحساب. نفس البيانات.</span></div>
                         <div className={styles.deviceAssurance}><CircleCheck size={21} /><p>لا تحتاج إلى حساب جديد لكل جهاز. وللمندوب، تبدأ التجربة من تطبيق الموبايل.</p></div>
                     </div>
                 </section>
-				<section id="how" className={styles.howSection}>
+				<section id="how" className={styles.howSection} data-reveal>
 					<div className={styles.howHeading}>
 						<span className={styles.eyebrow}>بداية واضحة</span>
 						<h2>
@@ -250,7 +190,7 @@ export default function Landing() {
 					</ol>
 				</section>
 				<section id="faq" className={styles.section}>
-					<div className={styles.faqLayout}>
+					<div className={styles.faqLayout} data-reveal>
 						<div>
 							<span className={styles.eyebrow}>الأسئلة الشائعة</span>
 							<h2 className={styles.sectionTitle}>
@@ -301,7 +241,7 @@ export default function Landing() {
 						</div>
 					</div>
 				</section>
-				<section className={styles.finalCta}>
+				<section className={styles.finalCta} data-reveal>
 					<span className={styles.eyebrow}>
 						<Sparkles size={16} /> خطوتك التالية
 					</span>
@@ -325,6 +265,6 @@ export default function Landing() {
 					<span dir="ltr">© {new Date().getFullYear()} SHARE FAST</span>
 				</div>
 			</footer>
-		</div>
+		</SiteMotion>
 	);
 }

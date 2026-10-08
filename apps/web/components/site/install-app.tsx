@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/wasl-api";
@@ -52,6 +53,7 @@ export default function InstallApp({ initialRole = "courier", autoOpen = false }
   <header className={styles.authHeader}><Brand /><Link href="/">العودة للموقع <ArrowLeft size={16} /></Link></header>
   <main className={`${styles.installPage} ${styles.installCompact}`}>
    <section className={styles.installSurface} aria-labelledby="install-heading">
+    <div className={styles.installPhoto}><Image src="/media/delivery-scene.svg" alt="مشهد توضيحي لاستلام طلب توصيل" fill unoptimized sizes="(max-width: 640px) 100vw, 580px" /><span>شغلك. أينما كنت.</span></div>
     <div className={styles.installDevice}>{device === "desktop" ? <Monitor size={20} /> : <Smartphone size={20} />}<span>SHARE FAST على {deviceLabel}</span></div>
     <h1 id="install-heading">ثبّت التطبيق.<br /><span>وخلي شغلك معك.</span></h1>
     <p className={styles.installLead}>افتح حسابك من أيقونة على جهازك، بنفس رقم الموبايل ونفس البيانات. بدون متجر.</p>

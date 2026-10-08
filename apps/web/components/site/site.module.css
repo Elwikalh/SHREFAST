@@ -1724,3 +1724,68 @@
 .installCompact .installSecurity svg { color: var(--accent); }
 @media(max-width:480px){.installCompact{padding:16px 20px 40px}.installCompact .installSurface{padding:24px 20px}.installCompact h1{font-size:30px}.installAccountRoles button{flex-direction:column;gap:4px}.installQuickHelp{padding:16px}}
 .installCompact .primary { font-weight: 700; }
+
+/* SHARE FAST visual edition — authentic imagery, calm motion, clear actions. */
+.polishedSite { --page: #f7f9f8; }
+.polishedSite .hero { max-width: 1240px; grid-template-columns: 1fr 1.08fr; padding: 64px 32px 56px; gap: 56px; }
+.polishedSite .heroCopy h1 { font-size: clamp(44px, 4.3vw, 64px); line-height: 1.35; margin: 24px 0; }
+.polishedSite .heroDescription { max-width: 510px; margin-bottom: 28px; }
+.heroArt { min-width: 0; padding-bottom: 4px; }
+.heroPhoto { position: relative; aspect-ratio: 1.12; border-radius: 12px; overflow: hidden; background: var(--soft); }
+.heroPhoto img { object-fit: cover; object-position: 55% center; }
+.photoCaption { position: absolute; right: 20px; top: 20px; padding: 8px 12px; border-radius: 8px; background: #ffffffed; color: #14282b; font-size: 14px; font-weight: 700; }
+.journeyCard { position: relative; margin: -40px 24px 0; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: 0 12px 28px -18px #14282b60; }
+.journeyHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.journeyHeading > span:first-child { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; }
+.journeyHeading svg { color: var(--accent); flex-shrink: 0; }
+.journeyLabel { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.journeyTrack { display: flex; align-items: center; gap: 8px; }
+.journeyTrack > div { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; font-size: 14px; font-weight: 700; }
+.journeyTrack svg { color: var(--accent); }
+.journeyLine { height: 2px; background: var(--accent); flex: 1; min-width: 8px; transform-origin: right; }
+.polishedSite .valueStrip { max-width: 1176px; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
+.polishedSite .section { max-width: 1240px; }
+.polishedSite .solutionCard { position: relative; background: var(--surface); border-top: 3px solid var(--accent); transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.polishedSite .solutionCard:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 28px -24px #14282b70; }
+.polishedSite .solutionIcon { background: var(--navy); color: #a9ebd9; border-radius: 10px; }
+.polishedSite .rolePrimary { border: 1px solid transparent; }
+.polishedSite .rolePrimary:hover { border-color: var(--accent); }
+.workStory { max-width: 1176px; margin: 0 auto 72px; display: grid; grid-template-columns: 1fr 1fr; border-radius: 12px; overflow: hidden; background: #102e32; color: #f1f9f7; }
+.storyMedia { position: relative; min-height: 440px; }
+.storyMedia img { object-fit: cover; object-position: 60% center; }
+.storyCopy { padding: 48px; }
+.storyCopy .eyebrow { color: #9de5d0; }
+.storyCopy h2 { font-size: 34px; line-height: 1.5; font-weight: 800; margin: 20px 0; }
+.storyCopy p { color: #c3d7d6; font-size: 16px; line-height: 1.9; margin-bottom: 24px; }
+.storyCopy ul { list-style: none; padding: 0; margin: 0 0 24px; display: grid; gap: 12px; }
+.storyCopy li { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+.storyCopy li svg { flex-shrink: 0; color: #9de5d0; }
+.storyLink { min-height: 48px; display: inline-flex; align-items: center; gap: 12px; color: #9de5d0; font-size: 16px; font-weight: 800; }
+.polishedSite .deviceSection { max-width: 1176px; background: var(--surface); padding: 48px; }
+.polishedSite .devicePanel { background: var(--soft); }
+.polishedSite .howSection { max-width: 1176px; background: var(--soft); }
+.polishedSite .stepNumber { background: var(--navy); color: #a9ebd9; border-color: var(--navy); }
+.polishedSite .finalCta { margin-top: 16px; }
+.polishedSite .primary, .polishedSite .secondary, .polishedSite .smallPrimary { transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+.polishedSite .primary:hover, .polishedSite .secondary:hover, .polishedSite .smallPrimary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px -10px #14282b80; }
+.polishedSite .primary svg, .storyLink svg { transition: transform 180ms ease; }
+.polishedSite .primary:hover svg, .storyLink:hover svg { transform: translateX(-3px); }
+.polishedSite [data-reveal] { transition: opacity 500ms ease, transform 500ms ease; }
+.polishedSite[data-motion="ready"] [data-reveal]:not([data-revealed]):not(:focus-within) { opacity: 0; transform: translateY(20px); }
+.installPhoto { position: relative; height: 160px; margin: -32px -32px 24px; overflow: hidden; border-radius: 11px 11px 0 0; background: var(--soft); }
+.installPhoto img { object-fit: cover; object-position: center 38%; }
+.installPhoto > span { position: absolute; bottom: 16px; right: 16px; color: #14282b; background: #ffffffed; border-radius: 8px; padding: 6px 12px; font-weight: 800; font-size: 14px; }
+@media(prefers-reduced-motion:no-preference){
+ .polishedSite .heroCopy { animation: sharefast-enter 600ms ease both; }
+ .polishedSite .heroArt { animation: sharefast-enter 750ms ease both; }
+ .journeyLine { animation: sharefast-route 900ms ease 500ms both; }
+}
+@keyframes sharefast-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sharefast-route { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media(max-width:1200px){.polishedSite .valueStrip{margin-left:32px;margin-right:32px}.workStory{margin-left:32px;margin-right:32px}.storyCopy{padding:32px}.storyCopy h2{font-size:30px}}
+@media(max-width:1000px){.polishedSite .hero{gap:32px}.journeyHeading{flex-wrap:wrap}.journeyCard{margin-left:16px;margin-right:16px;padding:16px}.journeyTrack{gap:6px}.journeyTrack > div{font-size:14px}.workStory{grid-template-columns:1fr 1fr}.storyMedia{min-height:420px}}
+@media(max-width:800px){.polishedSite .hero{grid-template-columns:1fr;padding:40px 24px;gap:36px}.polishedSite .heroCopy h1{font-size:44px}.heroPhoto{aspect-ratio:1.4}.journeyHeading{flex-wrap:nowrap}.polishedSite .valueStrip{margin-left:24px;margin-right:24px}.workStory{grid-template-columns:1fr;margin:0 24px 48px}.storyMedia{min-height:0;aspect-ratio:1.5}.storyCopy{padding:32px}.polishedSite .deviceSection{padding:32px}.polishedSite .section{padding:56px 24px}}
+@media(max-width:480px){.polishedSite .hero{padding:32px 20px 40px;gap:32px}.polishedSite .heroCopy h1{font-size:40px;line-height:1.4;margin:20px 0}.polishedSite .heroDescription{font-size:16px;line-height:1.9}.heroPhoto{aspect-ratio:1.2}.photoCaption{right:12px;top:12px;font-size:14px;padding:6px 10px}.journeyCard{margin:-24px 12px 0;padding:16px 12px}.journeyHeading{flex-wrap:wrap;gap:8px;margin-bottom:16px}.journeyTrack{gap:4px}.journeyTrack > div{font-size:14px;gap:6px}.polishedSite .valueStrip{margin-left:20px;margin-right:20px}.workStory{margin:0 20px 48px}.storyCopy{padding:24px}.storyCopy h2{font-size:28px}.polishedSite .deviceSection{padding:24px}.polishedSite .section{padding:48px 20px}.installPhoto{margin:-24px -20px 24px;height:140px}}
+@media(prefers-reduced-motion:reduce){.polishedSite [data-reveal],.polishedSite .solutionCard,.polishedSite .primary,.polishedSite .secondary,.polishedSite .smallPrimary,.polishedSite .primary svg,.storyLink svg{transition:none;transform:none!important;opacity:1!important}.polishedSite .heroCopy,.polishedSite .heroArt,.journeyLine{animation:none!important}}
+@media(prefers-color-scheme:dark){.polishedSite{--page:#102024}}
+@media(min-width:370px) and (max-width:800px){.polishedSite .hero .ctaRow{display:grid;grid-template-columns:1fr 1fr;gap:12px}.polishedSite .hero .ctaRow a{padding:12px 10px;gap:8px;font-size:16px}}
