@@ -1,3 +1,4 @@
+import { orderVisibilitySQL } from "./wasl-order-scope";
 import { normalizeEgyptPhone } from "./wasl-auth-schema";
 import { NextResponse } from "next/server";
 import { db } from "@el7bboB/db";
@@ -162,16 +163,7 @@ export async function scopedEntities(user: Principal, type?: string) {
 export async function scopedOrders(user: Principal) {
 	await ensureClientInviteTables();
 	await ensureCourierTables();
-	const where =
-		user.role === "admin"
-			? sql`TRUE`
-			: user.role === "merchant"
-				? sql`o.merchant_ref = ${user.ref}`
-				: user.role === "courier"
-					? sql`o.courier_ref = ${user.ref} OR EXISTS (SELECT 1 FROM wasl_couriers c WHERE c.ref = o.courier_ref AND c.account_id = ${user.id} AND c.status = 'active')`
-					: sql`o.company_ref = ${user.ref} OR EXISTS (
-  SELECT 1 FROM wasl_entities e JOIN wasl_client_invites ci ON ci.phone = e.phone AND ci.status = 'accepted'
-  WHERE e.ref = o.merchant_ref AND ci.company_ref = ${user.ref})`;
+	const where = orderVisibilitySQL(user);
 	return records<import("./wasl-store").WaslOrderRow>(
 		await db.execute(
 			sql`SELECT o.* FROM wasl_orders o WHERE (${where}) ORDER BY o.id DESC LIMIT 100`,
