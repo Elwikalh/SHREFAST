@@ -227,3 +227,5 @@ it("creation followed by cancellation serializes on the same link", async () => 
  it("rejects malformed estimate timestamp and inverted/beyond-limit ETA",()=>{
   for(const preparation of [{estimatedAt:"bad",estimatedReadyAt:null},{estimatedAt:"2026-10-09T10:00:00.000Z",estimatedReadyAt:"2026-10-09T09:00:00.000Z"},{estimatedAt:"2026-10-09T10:00:00.000Z",estimatedReadyAt:"2026-10-09T14:00:00.000Z"}])expect(()=>parseEnvelope({...input,preparation})).toThrow("invalid_fields");
  });
+
+it("preserves initial-estimate review flag without pretending actual readiness",async()=>{const preparation={estimatedAt:"2026-10-09T10:00:00.000Z",estimatedReadyAt:"2026-10-09T10:20:00.000Z",needsReview:true};const parsed=parseEnvelope({...input,preparation});expect(parsed.preparation?.needsReview).toBe(true);await createBridgeOrder(parsed,"restaurant");expect((await database.query("SELECT * FROM sharefast_preparation_events")).rows).toHaveLength(0);expect(()=>parseEnvelope({...input,preparation:{...preparation,needsReview:"yes"}})).toThrow("invalid_fields");});

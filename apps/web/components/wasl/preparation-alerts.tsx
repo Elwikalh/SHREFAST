@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "@/lib/wasl-api";
-type Entry = { ref: string; eventId: string | null; readyAt: string | null; preparation: { estimatedAt: string; estimatedReadyAt: string | null } | null };
+type Entry = { ref: string; eventId: string | null; readyAt: string | null; preparation: { estimatedAt: string; estimatedReadyAt: string | null; needsReview?:boolean } | null };
 export default function PreparationAlerts({ accountId }: { accountId: string }) {
   const [orders, setOrders] = useState<Entry[]>([]), [failed,setFailed]=useState(false), [permission,setPermission]=useState<NotificationPermission | "unsupported">("unsupported");
   const [now,setNow]=useState(Date.now());
@@ -52,7 +52,7 @@ export default function PreparationAlerts({ accountId }: { accountId: string }) 
     {failed && <p role="alert">تعذر تحديث الجاهزية؛ الحالة الحالية غير مؤكدة. ستتم إعادة المحاولة.</p>}
     <ul aria-live="polite">{orders.map(order=>{
       const remaining=order.preparation?.estimatedReadyAt?Math.ceil((Date.parse(order.preparation.estimatedReadyAt)-now)/60000):null;
-      return <li key={order.ref}><b>{order.ref}</b>: {order.readyAt ? "جاهز للاستلام" : remaining === null ? "جارٍ التجهيز — الوقت لم يُحدد" : remaining>0 ? `متبقي تقريبًا ${remaining} دقيقة` : "انتهى التقدير — ننتظر تأكيد المطبخ"}</li>;
+      return <li key={order.ref}><b>{order.ref}</b>: {order.readyAt ? "جاهز للاستلام" : remaining === null ? "جارٍ التجهيز — الوقت لم يُحدد" : remaining>0 ? `متبقي تقريبًا ${remaining} دقيقة` : "انتهى التقدير — ننتظر تأكيد المطبخ"}{!order.readyAt && order.preparation?.needsReview && <strong> · طلب كبير/تقدير يحتاج مراجعة؛ قد يتجاوز الوقت المبدئي؛ راجع المطبخ</strong>}</li>;
     })}</ul>
   </section>;
 }

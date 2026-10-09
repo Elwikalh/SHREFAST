@@ -2,14 +2,16 @@ import { sql } from "drizzle-orm";
 import { db } from "@el7bboB/db";
 import { WASL_ZONES } from "./wasl-store";
 const rows=<T>(r:unknown):T[]=>Array.isArray(r)?r as T[]:(r as {rows?:T[]}).rows||[];
-export type DeliveryPricingSettings={baseEGP:number;perKmEGP:number;minimumEGP:number;roadFactor:number;roundStepEGP:number;zoneOverrides:Record<string,number>};
-export const DEFAULT_DELIVERY_PRICING:DeliveryPricingSettings={baseEGP:15,perKmEGP:2.5,minimumEGP:25,roadFactor:1.3,roundStepEGP:5,zoneOverrides:{}};
+export type DeliveryPricingSettings={baseEGP:number;perKmEGP:number;minimumEGP:number;roadFactor:number;roundStepEGP:number;mansouraLocal:{minimumEGP:number;maximumEGP:number};zoneOverrides:Record<string,number>};
+export const DEFAULT_DELIVERY_PRICING:DeliveryPricingSettings={baseEGP:15,perKmEGP:2.5,minimumEGP:25,roadFactor:1.3,roundStepEGP:5,mansouraLocal:{minimumEGP:15,maximumEGP:30},zoneOverrides:{}};
 const bounded=(x:unknown,lo:number,hi:number)=>typeof x==="number"&&Number.isFinite(x)&&x>=lo&&x<=hi;
 export function parseDeliveryPricing(value:unknown):DeliveryPricingSettings {
  if(!value||typeof value!=="object"||Array.isArray(value))throw Error("invalid_pricing");const v=value as Record<string,unknown>;
- if(Object.keys(v).sort().join(",")!=="baseEGP,minimumEGP,perKmEGP,roadFactor,roundStepEGP,zoneOverrides"||!bounded(v.baseEGP,0,1000)||!bounded(v.perKmEGP,0,100)||!bounded(v.minimumEGP,0,1000)||!Number.isSafeInteger(v.minimumEGP)||!bounded(v.roadFactor,1,3)||![1,5,10].includes(v.roundStepEGP as number)||!v.zoneOverrides||typeof v.zoneOverrides!=="object"||Array.isArray(v.zoneOverrides))throw Error("invalid_pricing");
+ if(Object.keys(v).some(k=>!["baseEGP","minimumEGP","perKmEGP","roadFactor","roundStepEGP","zoneOverrides","mansouraLocal"].includes(k))||!bounded(v.baseEGP,0,1000)||!bounded(v.perKmEGP,0,100)||!bounded(v.minimumEGP,0,1000)||!Number.isSafeInteger(v.minimumEGP)||!bounded(v.roadFactor,1,3)||![1,5,10].includes(v.roundStepEGP as number)||!v.zoneOverrides||typeof v.zoneOverrides!=="object"||Array.isArray(v.zoneOverrides))throw Error("invalid_pricing");
+ const local=(v.mansouraLocal===undefined?{minimumEGP:15,maximumEGP:30}:v.mansouraLocal) as Record<string,unknown>;
+ if(!local||typeof local!=="object"||Array.isArray(local)||Object.keys(local).sort().join(",")!=="maximumEGP,minimumEGP"||!Number.isSafeInteger(local.minimumEGP)||!Number.isSafeInteger(local.maximumEGP)||!bounded(local.minimumEGP,0,1000)||!bounded(local.maximumEGP,0,1000)||(local.minimumEGP as number)>(local.maximumEGP as number))throw Error("invalid_pricing");
  for(const [pair,fee]of Object.entries(v.zoneOverrides)){const zones=pair.split("|");if(zones.length!==2||zones.some(zone=>!Object.hasOwn(WASL_ZONES,zone))||!Number.isSafeInteger(fee)||!bounded(fee,0,1000))throw Error("invalid_pricing");}
- return {baseEGP:v.baseEGP as number,perKmEGP:v.perKmEGP as number,minimumEGP:v.minimumEGP as number,roadFactor:v.roadFactor as number,roundStepEGP:v.roundStepEGP as number,zoneOverrides:{...v.zoneOverrides as Record<string,number>}};
+ return {baseEGP:v.baseEGP as number,perKmEGP:v.perKmEGP as number,minimumEGP:v.minimumEGP as number,roadFactor:v.roadFactor as number,roundStepEGP:v.roundStepEGP as number,mansouraLocal:{minimumEGP:local.minimumEGP as number,maximumEGP:local.maximumEGP as number},zoneOverrides:{...v.zoneOverrides as Record<string,number>}};
 }
 export function previewDeliveryQuote(config:DeliveryPricingSettings,fromZone:string,toZone:string){
  // Only known service zones: no silent 8km fallback for arbitrary text.
@@ -18,11 +20,12 @@ export function previewDeliveryQuote(config:DeliveryPricingSettings,fromZone:str
  const radius:Record<string,number>={المقطم:4.5,"التجمع الخامس":4.5,الرحاب:3.5,المعادي:3,الهرم:3.5};
  const r=radius[toZone]||2.5;
  const km=fromZone===toZone?Math.round(Math.max(1,(radius[fromZone]||2.5)*0.45)*10)/10:Math.round(Math.hypot((b[0]-a[0])*111.32,(b[1]-a[1])*111.32*0.866)*config.roadFactor*10)/10;
- const round=(n:number)=>Math.max(config.minimumEGP,Math.round(n/config.roundStepEGP)*config.roundStepEGP);
+ const local=fromZone==="المنصورة"&&toZone==="المنصورة";
+ const round=(n:number)=>{const rounded=Math.max(local?config.mansouraLocal.minimumEGP:config.minimumEGP,Math.round(n/config.roundStepEGP)*config.roundStepEGP);return local?Math.min(config.mansouraLocal.maximumEGP,rounded):rounded;};
  const feeMin=round(config.baseEGP+config.perKmEGP*Math.max(1,km-r)),feeMax=round(config.baseEGP+config.perKmEGP*(km+r));
  const pair=fromZone+"|"+toZone;const override=Object.hasOwn(config.zoneOverrides,pair)?config.zoneOverrides[pair]:undefined;
  const fee=override??Math.max(feeMin,Math.min(feeMax,Math.round((feeMin+feeMax)/(2*config.roundStepEGP))*config.roundStepEGP));
- return{fromZone,toZone,km,feeEGP:fee,feeMinEGP:override??feeMin,feeMaxEGP:override??feeMax,estimated:override===undefined};
+ return{fromZone,toZone,km,feeEGP:fee,feeMinEGP:override??feeMin,feeMaxEGP:override??feeMax,estimated:override===undefined,provisionalLocalRange:local&&override===undefined};
 }
 let ensured:Promise<void>|null=null;
 export function ensureDeliveryPricing(){if(!ensured)ensured=(async()=>{
