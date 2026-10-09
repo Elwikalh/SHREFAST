@@ -3,8 +3,9 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { sql, type SQL } from "drizzle-orm";
 import { beforeAll, beforeEach, afterAll, expect, it, vi } from "vitest";
 import type { Principal } from "../lib/wasl-auth";
-const f=vi.hoisted(()=>({execute:vi.fn(),transaction:vi.fn(),failClaim:false}));
+const f=vi.hoisted(()=>({execute:vi.fn(),transaction:vi.fn(),authorize:vi.fn(),failClaim:false}));
 vi.mock("@el7bboB/db",()=>({db:f}));
+vi.mock("../lib/wasl-access",async(original)=>({...await original<Record<string,unknown>>(),authorizeWasl:f.authorize}));
 import {ensureFreelanceDispatch,readDispatchSetting,saveDispatchSetting,freelanceOffers,claimFreelanceOffer,parseDispatchClaim,parseDispatchSetting} from "../lib/freelance-dispatch";
 import {lockCourierAssignment} from "../lib/courier-assignment-lock";
 import {orderVisibilitySQL} from "../lib/wasl-order-scope";
@@ -34,13 +35,17 @@ beforeAll(async()=>{
   await ensureFreelanceDispatch();
 },30000);
 beforeEach(async()=>{
-  f.failClaim=false;delete process.env.SHAREFAST_EL7BBOB_POLICY_ENABLED;
+  f.failClaim=false;f.authorize.mockResolvedValue(courier);delete process.env.SHAREFAST_EL7BBOB_POLICY_ENABLED;
   await database.exec(`DELETE FROM sharefast_freelance_audit;DELETE FROM sharefast_freelance_claims;DELETE FROM sharefast_freelance_availability;
     DELETE FROM sharefast_freelance_merchants;DELETE FROM sharefast_preparation_events;DELETE FROM sharefast_el7bbob_links;
     DELETE FROM wasl_orders;DELETE FROM wasl_couriers;DELETE FROM wasl_platform_settings;
     UPDATE wasl_accounts SET status='active';UPDATE wasl_courier_accounts SET status='active',zone='المنصورة',governorate='الدقهلية',sub_active=false,sub_until=NULL;`);
 });
-afterAll(()=>database.close());
+afterAll(()=>{
+  for(const key of ["SHAREFAST_EL7BBOB_ENABLED","SHAREFAST_EL7BBOB_SECRET","SHAREFAST_EL7BBOB_MERCHANT_REF","SHAREFAST_EL7BBOB_ACCOUNT_ID","SHAREFAST_EL7BBOB_COMPANY_REF","SHAREFAST_EL7BBOB_POLICY_ENABLED"])
+    delete process.env[key];
+  return database.close();
+});
 async function order(ref="SX-100",merchantRef="SX-2"){
   await database.query(`INSERT INTO wasl_orders(ref,merchant_ref,merchant_name,merchant_zone,from_addr,dest_zone,to_addr,fee,order_total,customer_phone,customer_name,note,ready_minutes)
     SELECT $1,ref,name,zone,address,'ميدان مشعل','PRIVATE CUSTOMER ADDRESS',20,120,'PRIVATE PHONE','PRIVATE NAME','PRIVATE NOTE',15 FROM wasl_entities WHERE ref=$2`,[ref,merchantRef]);
@@ -187,4 +192,45 @@ it("name-only legacy assignment blocks acceptance conservatively but never grant
   await expect(claimFreelanceOffer(courier,{orderRef:"SX-100"})).rejects.toMatchObject({code:"courier_busy"});
   const compiled=dialect.sqlToQuery(sql`SELECT o.ref FROM wasl_orders o WHERE ${orderVisibilitySQL(courier)}`);
   expect((await database.query(compiled.sql,compiled.params)).rows).toHaveLength(0);
+});
+it("walks signed restaurant order -> quote consumption -> offer -> claim -> real readiness -> delivery without changing InstaPay",async()=>{
+  const {signedHeaders}=await import("../lib/sharefast-protocol");
+  const {issueBridgeQuote}=await import("../lib/el7bbob-quotes");
+  const {POST:receive}=await import("../app/api/integrations/el7bbob/orders/route");
+  const {POST:advance}=await import("../app/api/wasl/advance/route");
+  const {GET:readPreparation}=await import("../app/api/wasl/preparation/route");
+  const {markBridgeOrderReady}=await import("../lib/el7bbob-preparation");
+  const secret="local-test-only-signing-key-not-a-production-secret";
+  process.env.SHAREFAST_EL7BBOB_ENABLED="true";process.env.SHAREFAST_EL7BBOB_SECRET=secret;
+  process.env.SHAREFAST_EL7BBOB_MERCHANT_REF="SX-2";delete process.env.SHAREFAST_EL7BBOB_COMPANY_REF;
+  await saveDispatchSetting(courier,{enabled:true,expectedRevision:0});
+  const q=await issueBridgeQuote("MAIN","ميدان مشعل","SX-2");
+  const id="44444444-4444-4444-8444-444444444444",now=new Date().toISOString();
+  const raw=JSON.stringify({version:1,externalOrderId:id,displayNumber:"MAIN-LOCAL-1",branchCode:"MAIN",destZone:q.destZone,
+    fromAddr:"PRIVATE PICKUP",toAddr:"PRIVATE CUSTOMER ADDRESS",feeEGP:q.feeEGP,totalEGP:100+q.feeEGP,
+    paymentMethod:"instapay",customerName:"PRIVATE NAME",customerPhone:"01000000001",note:"PRIVATE NOTE",source:"client_online",
+    preparation:{estimatedAt:now,estimatedReadyAt:new Date(Date.now()+15*60000).toISOString()},
+    quote:{id:q.id,acceptedAt:now}});
+  const path="/api/integrations/el7bbob/orders";
+  const createRequest=()=>new Request("https://local.invalid"+path,{method:"POST",body:raw,headers:signedHeaders(secret,"POST",path,raw)});
+  const created=await receive(createRequest());expect(created.status).toBe(201);
+  const result=await created.json();const ref:string=result.order.ref;
+  expect((await receive(createRequest())).status).toBe(200);
+  expect((await freelanceOffers(courier)).offers.map(o=>o.ref)).toEqual([ref]);
+  await claimFreelanceOffer(courier,{orderRef:ref});
+  const preparationRequest=()=>new Request("https://local.invalid/api/wasl/preparation");
+  expect((await(await readPreparation(preparationRequest())).json()).orders[0].readyAt).toBeNull();
+  const event=await markBridgeOrderReady(id,"SX-2");
+  expect((await(await readPreparation(preparationRequest())).json()).orders[0]).toMatchObject({ref,eventId:event.eventId,readyAt:event.readyAt});
+  f.authorize.mockResolvedValueOnce(second);
+  expect((await(await readPreparation(preparationRequest())).json()).orders).toHaveLength(0);
+  for(const status of ["pickup","heading","arrived","delivered"]){
+    const response=await advance(new Request("https://local.invalid/api/wasl/advance",{method:"POST",
+      headers:{"Content-Type":"application/json",Origin:"https://local.invalid"},body:JSON.stringify({ref,status})}));
+    expect(response.status).toBe(200);
+  }
+  const saved=(await database.query<{status:string;fee:number;order_total:number;pay:string}>("SELECT status,fee,order_total,pay FROM wasl_orders WHERE ref=$1",[ref])).rows[0];
+  expect(saved).toMatchObject({status:"delivered",fee:q.feeEGP,order_total:100+q.feeEGP});
+  expect(saved?.pay).toContain("إنستاباي");
+  expect((await database.query("SELECT * FROM sharefast_freelance_claims")).rows).toHaveLength(1);
 });

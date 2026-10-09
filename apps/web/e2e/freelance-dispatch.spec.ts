@@ -59,9 +59,10 @@ test("conflict never invents acceptance and clears the pending attempt",async({p
   await expect(panel(page).getByRole("button",{name:"إعادة التحقق من نفس الطلب"})).toHaveCount(0);
 });
 test("merchant opt-in sends no identity, fee or courier fields",async({page})=>{
+  const errors:string[]=[];page.on("console",m=>{if(m.type()==="error")errors.push(m.text());});
   const state=await mock(page,"merchant",false);await page.goto("/wasl");
   await panel(page).getByRole("button",{name:"تفعيل عروض الشبكة",exact:true}).click();
   await expect(panel(page)).toContainText("تم تفعيل استقبال عروض الشبكة");
   expect(state.settingBodies).toEqual([{enabled:true,expectedRevision:1}]);
-  expect(state.offersReads).toBe(0);
+  expect(state.offersReads).toBe(0);expect(errors.filter(e=>e.includes("same key"))).toEqual([]);
 });
