@@ -212,3 +212,5 @@ it("does not price a cross-city branch while delivery still inherits the root pi
     issueBridgeQuote("NEW", "طلخا", "restaurant"),
   ).rejects.toMatchObject({ code: "branch_binding_requires_review" });
 });
+
+it("food and standalone quote purposes cannot be exchanged",async()=>{const food=await issueBridgeQuote("MAIN","ميدان مشعل","restaurant"),standalone=await issueBridgeQuote("MAIN","ميدان مشعل","restaurant","standalone");expect(standalone.requestKind).toBe("standalone");expect(food.requestKind).toBeUndefined();await expect(transaction((tx:any)=>claimBridgeQuote(tx,{...envelope(food),requestKind:"standalone",source:"staff_standalone"},"restaurant"))).rejects.toMatchObject({code:"quote_mismatch"});await expect(transaction((tx:any)=>claimBridgeQuote(tx,envelope(standalone),"restaurant"))).rejects.toMatchObject({code:"quote_mismatch"});await transaction((tx:any)=>claimBridgeQuote(tx,{...envelope(standalone),requestKind:"standalone",source:"staff_standalone"},"restaurant"));});

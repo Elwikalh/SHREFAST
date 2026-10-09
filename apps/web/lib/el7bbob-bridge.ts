@@ -25,6 +25,8 @@ export function ensureBridgeTables(): Promise<void> {
         sql`ALTER TABLE sharefast_el7bbob_links ADD COLUMN IF NOT EXISTS cancel_requested BOOLEAN NOT NULL DEFAULT false`,
       );
       await db.execute(sql`ALTER TABLE sharefast_el7bbob_links ADD COLUMN IF NOT EXISTS preparation JSONB`);
+      await db.execute(sql`ALTER TABLE sharefast_el7bbob_links ADD COLUMN IF NOT EXISTS request_kind TEXT NOT NULL DEFAULT 'food'`);
+      await db.execute(sql`ALTER TABLE sharefast_el7bbob_links ADD COLUMN IF NOT EXISTS branch_code TEXT`);
       await db.execute(sql`CREATE TABLE IF NOT EXISTS sharefast_preparation_events (
         id BIGSERIAL PRIMARY KEY, external_order_id UUID UNIQUE NOT NULL REFERENCES sharefast_el7bbob_links(external_order_id),
         order_ref TEXT UNIQUE NOT NULL REFERENCES wasl_orders(ref), ready_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -74,21 +76,25 @@ export async function createBridgeOrder(
   merchantRef: string,
   companyRef = "",
 ) {
+  if(envelope.requestKind === "standalone" && !envelope.quote)throw new BridgeError("quote_required",409);
   await ensureBridgeTables();
   if(envelope.quote)await ensureQuoteTable();
   const hash = payloadHash(envelope);
   return db.transaction(async (tx) => {
     // Unique reservation + row lock serializes concurrent retries. A failed insert rolls back the reservation too.
-    await tx.execute(sql`INSERT INTO sharefast_el7bbob_links(external_order_id,payload_hash)
-      VALUES (${envelope.externalOrderId}::uuid,${hash}) ON CONFLICT (external_order_id) DO NOTHING`);
+    await tx.execute(sql`INSERT INTO sharefast_el7bbob_links(external_order_id,payload_hash,request_kind,branch_code)
+      VALUES (${envelope.externalOrderId}::uuid,${hash},${envelope.requestKind || "food"},${envelope.branchCode}) ON CONFLICT (external_order_id) DO NOTHING`);
     const link = rows<{
       payload_hash: string;
+      request_kind: string;
+      branch_code: string | null;
       order_ref: string | null;
       cancel_requested: boolean;
     }>(
-      await tx.execute(sql`SELECT payload_hash,order_ref,cancel_requested
+      await tx.execute(sql`SELECT payload_hash,order_ref,cancel_requested,request_kind,branch_code
       FROM sharefast_el7bbob_links WHERE external_order_id=${envelope.externalOrderId}::uuid FOR UPDATE`),
     )[0];
+    if(link && (link.request_kind !== (envelope.requestKind || "food") || (envelope.requestKind === "standalone" && link.branch_code !== envelope.branchCode)))throw new BridgeError("binding_conflict",409);
     if (link?.cancel_requested)
       throw new BridgeError("order_canceled_before_dispatch", 409);
     if (!link || link.payload_hash !== hash)
@@ -127,7 +133,7 @@ export async function createBridgeOrder(
       await tx.execute(sql`INSERT INTO wasl_orders
       (ref,merchant_name,merchant_zone,from_addr,dest_zone,to_addr,fee,fee_min,fee_max,pay,kind,customer_phone,customer_name,note,order_total,source,status,merchant_ref,company_ref)
       VALUES ('SX-' || nextval('wasl_order_seq'),${merchant.name},${merchant.zone},${envelope.fromAddr},${envelope.destZone},${envelope.toAddr},
-      ${envelope.feeEGP},${envelope.feeEGP},${envelope.feeEGP},${envelope.paymentMethod === "cash" ? "كاش" : "إنستاباي"},'أوردر طعام',
+      ${envelope.feeEGP},${envelope.feeEGP},${envelope.feeEGP},${envelope.paymentMethod === "cash" ? "كاش" : "إنستاباي"},${envelope.requestKind === "standalone" ? "طلب توصيل مستقل" : "أوردر طعام"},
       ${envelope.customerPhone},${envelope.customerName},${note},${envelope.totalEGP},'el7bbob','searching',${merchantRef},${companyRef || null}) RETURNING ref,status,courier`),
     )[0];
     if (!order) throw new Error("insert_failed");
@@ -138,14 +144,16 @@ export async function createBridgeOrder(
     return { created: true, order: snapshot(envelope.externalOrderId, order) };
   });
 }
+export type StandaloneScope = {requestKind:"standalone";branchCode:string};
 export async function readBridgeOrder(
   externalOrderId: string,
   merchantRef: string,
+  scope?:StandaloneScope,
 ) {
   await ensureBridgeTables();
   const order = rows<Stored>(
     await db.execute(sql`SELECT o.ref,o.status,o.courier FROM sharefast_el7bbob_links l
-    JOIN wasl_orders o ON o.ref=l.order_ref WHERE l.external_order_id=${externalOrderId}::uuid AND o.merchant_ref=${merchantRef}`),
+    JOIN wasl_orders o ON o.ref=l.order_ref WHERE l.external_order_id=${externalOrderId}::uuid AND o.merchant_ref=${merchantRef} AND l.request_kind=${scope?.requestKind || "food"} AND (${scope?.branchCode ?? null}::text IS NULL OR l.branch_code=${scope?.branchCode ?? null})`),
   )[0];
   if (!order) throw new BridgeError("not_found", 404);
   return snapshot(externalOrderId, order);
@@ -153,18 +161,20 @@ export async function readBridgeOrder(
 export async function cancelBridgeOrder(
   externalOrderId: string,
   merchantRef: string,
+  scope?:StandaloneScope,
 ): Promise<DeliverySnapshot> {
   await ensureBridgeTables();
   return db.transaction(async (tx) => {
     // Reserve a cancellation tombstone even if a timed-out create is not committed yet.
     // CREATE and CANCEL lock the same unique row, so a late POST cannot resurrect it.
-    await tx.execute(sql`INSERT INTO sharefast_el7bbob_links(external_order_id,payload_hash,cancel_requested)
-      VALUES (${externalOrderId}::uuid,'',true) ON CONFLICT (external_order_id) DO NOTHING`);
-    const link = rows<{ order_ref: string | null }>(
-      await tx.execute(sql`SELECT order_ref FROM sharefast_el7bbob_links
+    await tx.execute(sql`INSERT INTO sharefast_el7bbob_links(external_order_id,payload_hash,cancel_requested,request_kind,branch_code)
+      VALUES (${externalOrderId}::uuid,'',true,${scope?.requestKind || "food"},${scope?.branchCode ?? null}) ON CONFLICT (external_order_id) DO NOTHING`);
+    const link = rows<{ order_ref: string | null; request_kind:string;branch_code:string|null }>(
+      await tx.execute(sql`SELECT order_ref,request_kind,branch_code FROM sharefast_el7bbob_links
       WHERE external_order_id=${externalOrderId}::uuid FOR UPDATE`),
     )[0];
     if (!link) throw new Error("reservation_failed");
+    if(link.request_kind !== (scope?.requestKind || "food") || (scope && link.branch_code !== scope.branchCode))throw new BridgeError("binding_conflict",409);
     if (!link.order_ref) {
       await tx.execute(
         sql`UPDATE sharefast_el7bbob_links SET cancel_requested=true WHERE external_order_id=${externalOrderId}::uuid`,

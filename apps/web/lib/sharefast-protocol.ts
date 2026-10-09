@@ -5,6 +5,7 @@ export const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type DeliveryEnvelope = {
   version: 1;
+  requestKind?: "standalone";
   quote?: {id:string;acceptedAt:string};
   preparation?: { estimatedAt: string; estimatedReadyAt: string | null; needsReview?: boolean };
   externalOrderId: string;
@@ -19,7 +20,7 @@ export type DeliveryEnvelope = {
   customerName: string;
   customerPhone: string;
   note: string;
-  source: "client_online" | "owner_phone" | "owner_whatsapp" | "owner_counter";
+  source: "client_online" | "owner_phone" | "owner_whatsapp" | "owner_counter" | "staff_standalone";
 };
 export type DeliverySnapshot = {
   externalOrderId: string;
@@ -48,7 +49,7 @@ export function parseEnvelope(value: unknown): DeliveryEnvelope {
     "source",
   ];
   if (
-    Object.keys(v).some((k) => !keys.includes(k) && k !== "preparation" && k !== "quote") ||
+    Object.keys(v).some((k) => !keys.includes(k) && k !== "preparation" && k !== "quote" && k !== "requestKind") ||
     keys.some((k) => !(k in v))
   )
     throw new Error("invalid_fields");
@@ -85,6 +86,7 @@ export function parseEnvelope(value: unknown): DeliveryEnvelope {
       "owner_phone",
       "owner_whatsapp",
       "owner_counter",
+      "staff_standalone",
     ].includes(String(v.source))
   )
     throw new Error("invalid_fields");
@@ -99,11 +101,13 @@ export function parseEnvelope(value: unknown): DeliveryEnvelope {
       throw new Error("whole_egp_required");
   }
   if (
-    (v.totalEGP as number) <= 0 ||
+    ((v.totalEGP as number) <= 0 && v.requestKind !== "standalone") ||
     (v.feeEGP as number) > (v.totalEGP as number)
   )
     throw new Error("invalid_fields");
+  if (("requestKind" in v && v.requestKind !== "standalone") || (v.source === "staff_standalone") !== (v.requestKind === "standalone")) throw new Error("invalid_fields");
   const result = Object.fromEntries(keys.map((k) => [k, v[k]])) as DeliveryEnvelope;
+  if (v.requestKind === "standalone") result.requestKind = "standalone";
   if ("preparation" in v) {
     const p = v.preparation as Record<string, unknown>;
     const iso = (x: unknown): x is string => typeof x === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(x) && Number.isFinite(Date.parse(x)) && new Date(x).toISOString() === x;

@@ -18,6 +18,7 @@ export class QuoteError extends Error {
   }
 }
 export type QuoteSnapshot = {
+  requestKind?: "standalone";
   id: string;
   branchCode: string;
   destZone: string;
@@ -34,6 +35,7 @@ export function ensureQuoteTable() {
       await db.execute(
         sql`CREATE TABLE IF NOT EXISTS sharefast_el7bbob_quotes(id uuid PRIMARY KEY,merchant_ref text NOT NULL REFERENCES wasl_entities(ref),branch_code text NOT NULL,requested_zone text NOT NULL,pricing_zone text NOT NULL,from_zone text NOT NULL,fee integer NOT NULL,pricing_version integer NOT NULL,issued_at timestamptz NOT NULL DEFAULT now(),expires_at timestamptz NOT NULL DEFAULT now()+interval '10 minutes',external_order_id uuid UNIQUE)`,
       );
+      await db.execute(sql`ALTER TABLE sharefast_el7bbob_quotes ADD COLUMN IF NOT EXISTS request_kind text NOT NULL DEFAULT 'food'`);
     })().catch((e) => {
       ensured = null;
       throw e;
@@ -41,6 +43,7 @@ export function ensureQuoteTable() {
   return ensured;
 }
 type Stored = {
+  request_kind: string;
   id: string;
   branch_code: string;
   requested_zone: string;
@@ -51,6 +54,7 @@ type Stored = {
   external_order_id: string | null;
 };
 const snapshot = (q: Stored): QuoteSnapshot => ({
+  ...(q.request_kind === "standalone" ? {requestKind:"standalone" as const}:{}),
   id: q.id,
   branchCode: q.branch_code,
   destZone: q.requested_zone,
@@ -79,6 +83,7 @@ export async function issueBridgeQuote(
   branchCode: string,
   destZone: string,
   merchantRef: string,
+  requestKind: "food" | "standalone" = "food",
 ) {
   await ensureQuoteTable();
   const merchant = rows<{ zone: string }>(
@@ -112,7 +117,7 @@ export async function issueBridgeQuote(
   }
   const saved = rows<Stored>(
     await db.execute(
-      sql`INSERT INTO sharefast_el7bbob_quotes(id,merchant_ref,branch_code,requested_zone,pricing_zone,from_zone,fee,pricing_version)VALUES(${randomUUID()}::uuid,${merchantRef},${branchCode},${destZone},${pricingZone},${fromZone},${preview.feeEGP},${current.version})RETURNING *`,
+      sql`INSERT INTO sharefast_el7bbob_quotes(id,merchant_ref,branch_code,requested_zone,pricing_zone,from_zone,fee,pricing_version,request_kind)VALUES(${randomUUID()}::uuid,${merchantRef},${branchCode},${destZone},${pricingZone},${fromZone},${preview.feeEGP},${current.version},${requestKind})RETURNING *`,
     ),
   )[0]!;
   return snapshot(saved);
@@ -144,6 +149,7 @@ export async function claimBridgeQuote(
   )[0];
   if (!q) throw new QuoteError("quote_not_found", 409);
   if (
+    q.request_kind !== (envelope.requestKind || "food") ||
     q.branch_code !== envelope.branchCode ||
     q.requested_zone !== envelope.destZone ||
     q.fee !== envelope.feeEGP

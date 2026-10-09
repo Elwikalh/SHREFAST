@@ -108,3 +108,7 @@ it("keeps known expired errors reviewable without leaking database internals", a
   expect(r.status).toBe(503);
   expect(await r.text()).not.toContain("private");
 });
+
+it("standalone quote endpoint fixes purpose on the server and rejects body overrides",async()=>{
+ const {POST:standalonePOST}=await import("../app/api/integrations/el7bbob/delivery-quote/route");const p="/api/integrations/el7bbob/delivery-quote";const raw=JSON.stringify({branchCode:"MAIN",destZone:"ميدان مشعل"});expect((await standalonePOST(request("POST",p,raw))).status).toBe(201);expect(f.issue).toHaveBeenCalledWith("MAIN","ميدان مشعل","root","standalone");expect((await standalonePOST(request("POST",p,raw,false))).status).toBe(401);expect((await standalonePOST(request("POST",p,JSON.stringify({branchCode:"MAIN",destZone:"ميدان مشعل",requestKind:"food"})))).status).toBe(400);
+});

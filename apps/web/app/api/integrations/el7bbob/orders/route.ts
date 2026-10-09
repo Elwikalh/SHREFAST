@@ -23,6 +23,7 @@ async function handle(request: Request): Promise<Response> {
       return reply({ ok: false, error: "invalid_signature" }, 401);
     if (request.method === "POST") {
       const envelope = parseEnvelope(JSON.parse(raw));
+      if(envelope.requestKind)throw new Error("invalid_fields");
       if(requireQuotes&&!envelope.quote)return reply({ok:false,error:"quote_required"},409);
       const result = await createBridgeOrder(envelope, merchantRef, companyRef);
       return reply(
