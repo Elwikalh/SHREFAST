@@ -86,3 +86,11 @@ test("failed save never turns the courier switch on",async({page})=>{
   await expect(toggle).toBeEnabled();await toggle.click();await expect(panel(page)).toContainText("لم نتأكد من حفظ الإعداد");
   await expect(toggle).not.toBeChecked();await expect(page.getByText("استقبال الطلبات مفعّل",{exact:true})).toHaveCount(0);
 });
+
+test("preparation information stays inside the courier app; expired ETA is not readiness",async({page})=>{
+ await mock(page);await page.route("**/api/wasl/preparation",route=>route.fulfill({contentType:"application/json",body:JSON.stringify({ok:true,orders:[{ref:"SX-100",eventId:null,readyAt:null,preparation:{estimatedAt:new Date(Date.now()-600000).toISOString(),estimatedReadyAt:new Date(Date.now()-60000).toISOString()}}]})}));
+ await page.goto("/wasl");const ready=page.getByRole("region",{name:"جاهزية طلبات المطعم"});
+ await expect(ready).toBeVisible();await expect(ready).toContainText("ننتظر تأكيد المطبخ");
+ await expect(ready.locator("xpath=ancestor::div[contains(@class,'app-body')]" )).toHaveCount(1);
+ await expect(ready).not.toHaveClass(/portal-review-notice/);await expect(ready).not.toContainText("جاهز للاستلام");
+});

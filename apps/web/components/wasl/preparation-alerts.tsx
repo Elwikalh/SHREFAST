@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { apiFetch } from "@/lib/wasl-api";
 type Entry = { ref: string; eventId: string | null; readyAt: string | null; preparation: { estimatedAt: string; estimatedReadyAt: string | null; needsReview?:boolean } | null };
-export default function PreparationAlerts({ accountId }: { accountId: string }) {
+export default function PreparationAlerts({ accountId, render }: { accountId: string; render?:(content:ReactNode)=>ReactNode }) {
   const [orders, setOrders] = useState<Entry[]>([]), [failed,setFailed]=useState(false), [permission,setPermission]=useState<NotificationPermission | "unsupported">("unsupported");
   const [now,setNow]=useState<number | null>(null);
   const seen = useRef(new Set<string>());
@@ -44,15 +44,15 @@ export default function PreparationAlerts({ accountId }: { accountId: string }) 
   async function enable() {
     if("Notification" in window)try {setPermission(await Notification.requestPermission());}catch {setPermission("denied");}
   }
-  if(!orders.length && !failed)return null;
-  return <section aria-label="جاهزية طلبات المطعم" className="portal-review-notice">
+  const content=!orders.length && !failed?null:<section aria-label="جاهزية طلبات المطعم" className="bigcard" style={{marginBottom:16}}>
     <h2>تجهيز الطلبات</h2>
-    {permission==="default" && <button type="button" onClick={enable}>تفعيل تنبيهات الجاهزية</button>}
-    <p>وقت التجهيز تقديري. التنبيه يعتمد على إعلان المطبخ جاهزية الطلب. تنبيهات هذه النسخة تحتاج التطبيق مفتوحًا واتصالًا؛ إشعارات الخلفية لم تُفعّل بعد.</p>
+    {permission==="default" && <button className="btn btn-o" type="button" onClick={enable}>تفعيل تنبيهات الجاهزية</button>}
+    <p style={{fontSize:12}}>وقت التجهيز تقريبي؛ الجاهزية يؤكدها المطبخ. التنبيهات أثناء فتح التطبيق.</p>
     {failed && <p role="alert">تعذر تحديث الجاهزية؛ الحالة الحالية غير مؤكدة. ستتم إعادة المحاولة.</p>}
     <ul aria-live="polite">{orders.map(order=>{
       const remaining=order.preparation?.estimatedReadyAt && now !== null?Math.ceil((Date.parse(order.preparation.estimatedReadyAt)-now)/60000):null;
       return <li key={order.ref}><b>{order.ref}</b>: {order.readyAt ? "جاهز للاستلام" : remaining === null ? "جارٍ التجهيز — الوقت لم يُحدد" : remaining>0 ? `متبقي تقريبًا ${remaining} دقيقة` : "انتهى التقدير — ننتظر تأكيد المطبخ"}{!order.readyAt && order.preparation?.needsReview && <strong> · طلب كبير/تقدير يحتاج مراجعة؛ قد يتجاوز الوقت المبدئي؛ راجع المطبخ</strong>}</li>;
     })}</ul>
   </section>;
+  return render?render(content):content;
 }
