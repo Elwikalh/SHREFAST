@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@el7bboB/db";
 import { authorizeWasl, ownedCourier } from "@/lib/wasl-access";
 import { readJsonRecord, courierCanWork } from "@/lib/wasl-validation";
+import { lockCourierAssignment, DispatchError } from "@/lib/courier-assignment-lock";
 import {
 	waslOrderToClient,
 	ensureCourierTables,
@@ -69,8 +70,13 @@ export async function POST(request: Request) {
 					: user.role === "company"
 						? sql`company_ref = ${user.ref}`
 						: sql`courier_ref = ${user.ref} OR EXISTS (SELECT 1 FROM wasl_couriers c WHERE c.ref = wasl_orders.courier_ref AND c.account_id = ${user.id} AND c.status = 'active')`;
-		const result =
-			await db.execute(sql`UPDATE wasl_orders SET status = ${status},
+		const result = await db.transaction(async tx => {
+      if (status === "accepted" && courierRef) await lockCourierAssignment(tx, courierRef, ref);
+      if (status === "accepted" && courierRef && (user.role === "merchant" || user.role === "company")) {
+        const active = await tx.execute(sql`SELECT ref FROM wasl_couriers WHERE ref=${courierRef} AND owner_ref=${user.ref} AND status='active' FOR SHARE`);
+        if (!Array.isArray(active) || !active.length) throw new DispatchError("courier_not_active");
+      }
+      return tx.execute(sql`UPDATE wasl_orders SET status = ${status},
    courier_ref = COALESCE(${courierRef}, courier_ref), courier = COALESCE(${courierName}, courier)
    ${status === "arrived" ? sql`, arrived_at = now()` : sql``}
    ${["delivered", "refused", "no_answer"].includes(status) ? sql`, outcome = ${status}` : sql``}
@@ -78,6 +84,7 @@ export async function POST(request: Request) {
 			allowedFrom.map((x) => sql`${x}`),
 			sql`, `,
 		)}) RETURNING *`);
+    });
 		const row = Array.isArray(result)
 			? (result[0] as WaslOrderRow | undefined)
 			: undefined;
@@ -87,7 +94,8 @@ export async function POST(request: Request) {
 				{ status: 409 },
 			);
 		return NextResponse.json({ ok: true, order: waslOrderToClient(row) });
-	} catch {
+	} catch (error) {
+    if (error instanceof DispatchError) return NextResponse.json({ok:false,error:error.code},{status:error.status});
 		return NextResponse.json(
 			{ ok: false, error: "db_unavailable" },
 			{ status: 503 },

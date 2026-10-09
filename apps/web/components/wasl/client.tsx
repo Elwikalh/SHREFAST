@@ -1,6 +1,7 @@
 "use client";
 import OwnedPolicyBanner from "./owned-policy-banner";
 import DispatchQueuePanel from "./dispatch-queue-panel";
+import FreelanceDispatchPanel from "./freelance-dispatch-panel";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -88,7 +89,7 @@ export default function WaslClient({ quickRequest = false }: { quickRequest?: bo
 			</main>
 		);
 
- if (quickRequest) return user.role === "merchant" ? <><OwnedPolicyBanner key={user.id} accountId={user.id} /><QuickRequest principal={user} /></> : <main className="portal-loading"><div>طلب مندوب متاح من حساب مطعم أو نشاط تجاري.</div><Link href="/wasl">العودة إلى لوحة حسابك</Link></main>;
+ if (quickRequest) return user.role === "merchant" ? <><OwnedPolicyBanner key={"policy:"+user.id} accountId={user.id} /><FreelanceDispatchPanel key={"dispatch:"+user.id} accountId={user.id} role="merchant" /><QuickRequest principal={user} /></> : <main className="portal-loading"><div>طلب مندوب متاح من حساب مطعم أو نشاط تجاري.</div><Link href="/wasl">العودة إلى لوحة حسابك</Link></main>;
 	return (
 		<>
 			<div className="account-session-bar">
@@ -111,9 +112,10 @@ export default function WaslClient({ quickRequest = false }: { quickRequest?: bo
 				</div>
 			)}
 			{user.role === "courier" && <PreparationAlerts accountId={user.id} />}
+      {(user.role === "merchant" || user.role === "courier") && <FreelanceDispatchPanel key={"dispatch:"+user.id} accountId={user.id} role={user.role} />}
 			{user.role === "admin" && <Link href="/wasl/delivery-pricing">إعدادات تسعيرة التوصيل</Link>}
-			{user.role === "merchant" && <OwnedPolicyBanner key={user.id} accountId={user.id} />}
-			{["admin","merchant","company"].includes(user.role) && <DispatchQueuePanel key={user.id} accountId={user.id} />}
+			{user.role === "merchant" && <OwnedPolicyBanner key={"policy:"+user.id} accountId={user.id} />}
+			{["admin","merchant","company"].includes(user.role) && <DispatchQueuePanel key={"queue:"+user.id} accountId={user.id} />}
 			{user.role === "admin" && <Link href="/wasl/owned-restaurants">سياسة الحبوب والفروع الموثقة</Link>}
 			<Portal principal={user} />
 		</>
