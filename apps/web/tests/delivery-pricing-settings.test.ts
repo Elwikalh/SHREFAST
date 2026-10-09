@@ -1,0 +1,13 @@
+import {PGlite} from "@electric-sql/pglite";
+import {PgDialect} from "drizzle-orm/pg-core";
+import {beforeAll,beforeEach,afterAll,it,expect,vi} from "vitest";
+const f=vi.hoisted(()=>({execute:vi.fn(),transaction:vi.fn()}));vi.mock("@el7bboB/db",()=>({db:f}));
+import {ensureDeliveryPricing,loadDeliveryPricing,saveDeliveryPricing,previewDeliveryQuote,parseDeliveryPricing,DEFAULT_DELIVERY_PRICING} from "../lib/delivery-pricing-settings";
+const db=new PGlite(),dialect=new PgDialect();
+beforeAll(async()=>{f.execute.mockImplementation(async(q)=>{const s=dialect.sqlToQuery(q);return(await db.query(s.sql,s.params)).rows;});f.transaction.mockImplementation(cb=>db.transaction(tx=>cb({execute:async(q)=>{const s=dialect.sqlToQuery(q);return(await tx.query(s.sql,s.params)).rows;}})));await ensureDeliveryPricing();});
+beforeEach(async()=>{await db.exec("DELETE FROM sharefast_delivery_pricing_history;DELETE FROM sharefast_delivery_pricing;");});afterAll(()=>db.close());
+it("uses existing formula coefficients as provisional defaults",async()=>{const x=await loadDeliveryPricing();expect(x.version).toBe(0);expect(x.settings).toEqual(DEFAULT_DELIVERY_PRICING);expect(previewDeliveryQuote(x.settings,"المنصورة","المنصورة").feeEGP).toBe(25);});
+it("unknown zones do not receive arbitrary eight-km quotes",()=>{expect(()=>previewDeliveryQuote(DEFAULT_DELIVERY_PRICING,"المنصورة","شارع غير مسجل")).toThrow("unsupported_zone");});
+it("fixed price overrides only its specific pickup/destination pair, including zero",()=>{const settings=parseDeliveryPricing({...DEFAULT_DELIVERY_PRICING,zoneOverrides:{"المنصورة|طلخا":0}});expect(previewDeliveryQuote(settings,"المنصورة","طلخا").feeEGP).toBe(0);expect(previewDeliveryQuote(settings,"طلخا","طلخا").feeEGP).toBe(25);});
+it("saved revisions are audited and stale browser updates cannot overwrite",async()=>{const a=await saveDeliveryPricing(DEFAULT_DELIVERY_PRICING,0,"admin1");expect(a.version).toBe(1);await expect(saveDeliveryPricing(DEFAULT_DELIVERY_PRICING,0,"admin2")).rejects.toThrow("settings_changed_reload");await saveDeliveryPricing({...DEFAULT_DELIVERY_PRICING,minimumEGP:30},1,"admin1");expect((await loadDeliveryPricing()).settings.minimumEGP).toBe(30);expect((await db.query("SELECT * FROM sharefast_delivery_pricing_history")).rows).toHaveLength(2);});
+it("rejects non-finite, fractional-integer, malformed and unsupported settings",()=>{for(const settings of [{...DEFAULT_DELIVERY_PRICING,minimumEGP:2.5},{...DEFAULT_DELIVERY_PRICING,perKmEGP:NaN},{...DEFAULT_DELIVERY_PRICING,roundStepEGP:3},{...DEFAULT_DELIVERY_PRICING,zoneOverrides:{"unknown|طلخا":30}},{...DEFAULT_DELIVERY_PRICING,merchantRef:"fake"}])expect(()=>parseDeliveryPricing(settings)).toThrow("invalid_pricing");});

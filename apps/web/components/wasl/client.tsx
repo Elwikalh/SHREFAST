@@ -109,6 +109,7 @@ export default function WaslClient({ quickRequest = false }: { quickRequest?: bo
 				</div>
 			)}
 			{user.role === "courier" && <PreparationAlerts accountId={user.id} />}
+			{user.role === "admin" && <Link href="/wasl/delivery-pricing">إعدادات تسعيرة التوصيل</Link>}
 			<Portal principal={user} />
 		</>
 	);
