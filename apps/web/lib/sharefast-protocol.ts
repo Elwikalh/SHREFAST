@@ -5,6 +5,7 @@ export const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type DeliveryEnvelope = {
   version: 1;
+  preparation?: { estimatedAt: string; estimatedReadyAt: string | null };
   externalOrderId: string;
   displayNumber: string;
   branchCode: string;
@@ -46,7 +47,7 @@ export function parseEnvelope(value: unknown): DeliveryEnvelope {
     "source",
   ];
   if (
-    Object.keys(v).some((k) => !keys.includes(k)) ||
+    Object.keys(v).some((k) => !keys.includes(k) && k !== "preparation") ||
     keys.some((k) => !(k in v))
   )
     throw new Error("invalid_fields");
@@ -101,7 +102,15 @@ export function parseEnvelope(value: unknown): DeliveryEnvelope {
     (v.feeEGP as number) > (v.totalEGP as number)
   )
     throw new Error("invalid_fields");
-  return Object.fromEntries(keys.map((k) => [k, v[k]])) as DeliveryEnvelope;
+  const result = Object.fromEntries(keys.map((k) => [k, v[k]])) as DeliveryEnvelope;
+  if ("preparation" in v) {
+    const p = v.preparation as Record<string, unknown>;
+    const iso = (x: unknown): x is string => typeof x === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(x) && Number.isFinite(Date.parse(x)) && new Date(x).toISOString() === x;
+    if (!p || typeof p !== "object" || Array.isArray(p) || Object.keys(p).length !== 2 || !iso(p.estimatedAt) || !(p.estimatedReadyAt === null || iso(p.estimatedReadyAt))) throw new Error("invalid_fields");
+    if (p.estimatedReadyAt !== null && (Date.parse(p.estimatedReadyAt as string) < Date.parse(p.estimatedAt) || Date.parse(p.estimatedReadyAt as string) - Date.parse(p.estimatedAt) > 180 * 60000)) throw new Error("invalid_fields");
+    result.preparation = { estimatedAt: p.estimatedAt, estimatedReadyAt: p.estimatedReadyAt as string | null };
+  }
+  return result;
 }
 export function payloadHash(envelope: DeliveryEnvelope): string {
   return createHash("sha256")

@@ -23,6 +23,11 @@ export function ensureBridgeTables(): Promise<void> {
       await db.execute(
         sql`ALTER TABLE sharefast_el7bbob_links ADD COLUMN IF NOT EXISTS cancel_requested BOOLEAN NOT NULL DEFAULT false`,
       );
+      await db.execute(sql`ALTER TABLE sharefast_el7bbob_links ADD COLUMN IF NOT EXISTS preparation JSONB`);
+      await db.execute(sql`CREATE TABLE IF NOT EXISTS sharefast_preparation_events (
+        id BIGSERIAL PRIMARY KEY, external_order_id UUID UNIQUE NOT NULL REFERENCES sharefast_el7bbob_links(external_order_id),
+        order_ref TEXT UNIQUE NOT NULL REFERENCES wasl_orders(ref), ready_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
     })().catch((error) => {
       ready = null;
       throw error;
@@ -125,6 +130,7 @@ export async function createBridgeOrder(
     await tx.execute(
       sql`UPDATE sharefast_el7bbob_links SET order_ref=${order.ref} WHERE external_order_id=${envelope.externalOrderId}::uuid`,
     );
+    if (envelope.preparation) await tx.execute(sql`UPDATE sharefast_el7bbob_links SET preparation=${JSON.stringify(envelope.preparation)}::jsonb WHERE external_order_id=${envelope.externalOrderId}::uuid`);
     return { created: true, order: snapshot(envelope.externalOrderId, order) };
   });
 }

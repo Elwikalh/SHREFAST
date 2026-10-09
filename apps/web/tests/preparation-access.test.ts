@@ -1,0 +1,13 @@
+import {it,expect,vi,beforeEach} from "vitest";
+const f=vi.hoisted(()=>({execute:vi.fn(),authorize:vi.fn(),scope:vi.fn(),ensure:vi.fn()}));
+vi.mock("@el7bboB/db",()=>({db:{execute:f.execute}}));
+vi.mock("@/lib/wasl-access",()=>({authorizeWasl:f.authorize,scopedOrders:f.scope}));
+vi.mock("@/lib/el7bbob-bridge",()=>({ensureBridgeTables:f.ensure}));
+import {GET} from "../app/api/wasl/preparation/route";
+beforeEach(()=>{vi.clearAllMocks();process.env.SHAREFAST_EL7BBOB_ENABLED="true";f.authorize.mockResolvedValue({role:"courier",ref:"courier1"});f.scope.mockResolvedValue([{ref:"SX-1",status:"accepted"}]);f.execute.mockResolvedValue([{ref:"SX-1",eventId:"1",readyAt:"2026-10-09T10:00:00Z",preparation:null}]);});
+it("requires authenticated session",async()=>{f.authorize.mockResolvedValue(Response.json({error:"auth"},{status:401}));expect((await GET(new Request("https://test.invalid/api/wasl/preparation"))).status).toBe(401);expect(f.execute).not.toHaveBeenCalled();});
+it("only courier role can read preparation notifications",async()=>{f.authorize.mockResolvedValue({role:"merchant"});expect((await GET(new Request("https://test.invalid/api/wasl/preparation"))).status).toBe(403);expect(f.scope).not.toHaveBeenCalled();});
+it("no storage access when bridge is disabled",async()=>{process.env.SHAREFAST_EL7BBOB_ENABLED="false";expect(await (await GET(new Request("https://test.invalid/api/wasl/preparation"))).json()).toEqual({ok:true,enabled:false,orders:[]});expect(f.ensure).not.toHaveBeenCalled();});
+it("does not allow URL refs to override server-scoped courier assignments",async()=>{const response=await GET(new Request("https://test.invalid/api/wasl/preparation?ref=other-courier"));expect(response.status).toBe(200);expect(f.scope).toHaveBeenCalledWith({role:"courier",ref:"courier1"});expect(response.headers.get("cache-control")).toBe("no-store");});
+it("no assigned active orders means no readiness or customer data",async()=>{f.scope.mockResolvedValue([{ref:"SX-2",status:"canceled"}]);expect((await (await GET(new Request("https://test.invalid/api/wasl/preparation"))).json()).orders).toEqual([]);expect(f.execute).not.toHaveBeenCalled();});
+it("does not return stale readiness on storage failure",async()=>{f.execute.mockRejectedValue(Error("db"));expect((await GET(new Request("https://test.invalid/api/wasl/preparation"))).status).toBe(503);});

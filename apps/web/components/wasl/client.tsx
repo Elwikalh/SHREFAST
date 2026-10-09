@@ -7,6 +7,7 @@ import { AlertCircle, LoaderCircle, LogOut, RotateCcw } from "lucide-react";
 import type { Principal } from "@/lib/wasl-auth";
 import { apiFetch } from "@/lib/wasl-api";
 import QuickRequest from "./quick-request";
+import PreparationAlerts from "./preparation-alerts";
 const Portal = dynamic(() => import("./portal"), {
 	ssr: false,
 	loading: () => (
@@ -107,6 +108,7 @@ export default function WaslClient({ quickRequest = false }: { quickRequest?: bo
 					بعض التقارير تحتوي بيانات توضيحية ولا تصلح للحسابات المالية. الطلبات المرتبطة بحسابك تُحمّل من الخادم.
 				</div>
 			)}
+			{user.role === "courier" && <PreparationAlerts accountId={user.id} />}
 			<Portal principal={user} />
 		</>
 	);
