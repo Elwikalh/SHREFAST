@@ -167,3 +167,10 @@ it("keeps conflict errors reviewable and hides database details", async () => {
   expect(await response.text()).not.toContain("private db details");
   spy.mockRestore();
 });
+
+it("requires a trusted quote when rollout quote enforcement is enabled",async()=>{
+ runtime.config.mockReturnValue({secret,merchantRef:"bound-restaurant",companyRef:"",requireQuotes:true});
+ const r=await POST(request("POST",BRIDGE_PATH,JSON.stringify(input)));expect(r.status).toBe(409);expect((await r.json()).error).toBe("quote_required");expect(runtime.create).not.toHaveBeenCalled();
+ const withQuote={...input,quote:{id:"22222222-2222-4222-8222-222222222222",acceptedAt:new Date().toISOString()}};
+ expect((await POST(request("POST",BRIDGE_PATH,JSON.stringify(withQuote)))).status).toBe(201);
+});

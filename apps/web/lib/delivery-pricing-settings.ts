@@ -1,3 +1,4 @@
+import {MANSOURA_AREA_DEFAULTS} from "./mansoura-pricing-areas";
 import { sql } from "drizzle-orm";
 import { db } from "@el7bboB/db";
 import { WASL_ZONES } from "./wasl-store";
@@ -10,10 +11,15 @@ export function parseDeliveryPricing(value:unknown):DeliveryPricingSettings {
  if(Object.keys(v).some(k=>!["baseEGP","minimumEGP","perKmEGP","roadFactor","roundStepEGP","zoneOverrides","mansouraLocal"].includes(k))||!bounded(v.baseEGP,0,1000)||!bounded(v.perKmEGP,0,100)||!bounded(v.minimumEGP,0,1000)||!Number.isSafeInteger(v.minimumEGP)||!bounded(v.roadFactor,1,3)||![1,5,10].includes(v.roundStepEGP as number)||!v.zoneOverrides||typeof v.zoneOverrides!=="object"||Array.isArray(v.zoneOverrides))throw Error("invalid_pricing");
  const local=(v.mansouraLocal===undefined?{minimumEGP:15,maximumEGP:30}:v.mansouraLocal) as Record<string,unknown>;
  if(!local||typeof local!=="object"||Array.isArray(local)||Object.keys(local).sort().join(",")!=="maximumEGP,minimumEGP"||!Number.isSafeInteger(local.minimumEGP)||!Number.isSafeInteger(local.maximumEGP)||!bounded(local.minimumEGP,0,1000)||!bounded(local.maximumEGP,0,1000)||(local.minimumEGP as number)>(local.maximumEGP as number))throw Error("invalid_pricing");
- for(const [pair,fee]of Object.entries(v.zoneOverrides)){const zones=pair.split("|");if(zones.length!==2||zones.some(zone=>!Object.hasOwn(WASL_ZONES,zone))||!Number.isSafeInteger(fee)||!bounded(fee,0,1000))throw Error("invalid_pricing");}
+ for(const [pair,fee]of Object.entries(v.zoneOverrides)){const zones=pair.split("|");if(zones.length!==2||!Object.hasOwn(WASL_ZONES,zones[0])||(!Object.hasOwn(WASL_ZONES,zones[1])&&!(zones[0]==="المنصورة"&&Object.hasOwn(MANSOURA_AREA_DEFAULTS,zones[1])))||!Number.isSafeInteger(fee)||!bounded(fee,0,1000))throw Error("invalid_pricing");}
  return {baseEGP:v.baseEGP as number,perKmEGP:v.perKmEGP as number,minimumEGP:v.minimumEGP as number,roadFactor:v.roadFactor as number,roundStepEGP:v.roundStepEGP as number,mansouraLocal:{minimumEGP:local.minimumEGP as number,maximumEGP:local.maximumEGP as number},zoneOverrides:{...v.zoneOverrides as Record<string,number>}};
 }
 export function previewDeliveryQuote(config:DeliveryPricingSettings,fromZone:string,toZone:string){
+ const area=Object.hasOwn(MANSOURA_AREA_DEFAULTS,toZone)?MANSOURA_AREA_DEFAULTS[toZone]:undefined;
+ if(fromZone==="المنصورة"&&area){
+   const pair=fromZone+"|"+toZone;const overridden=Object.hasOwn(config.zoneOverrides,pair);const fee=overridden?config.zoneOverrides[pair]!:area.local?Math.max(config.mansouraLocal.minimumEGP,Math.min(config.mansouraLocal.maximumEGP,area.feeEGP)):area.feeEGP;
+   return {fromZone,toZone,km:null,feeEGP:fee,feeMinEGP:fee,feeMaxEGP:fee,estimated:!overridden,provisionalLocalRange:area.local&&!overridden};
+ }
  // Only known service zones: no silent 8km fallback for arbitrary text.
  if(!Object.hasOwn(WASL_ZONES,fromZone)||!Object.hasOwn(WASL_ZONES,toZone))throw Error("unsupported_zone");
  const a=WASL_ZONES[fromZone]!,b=WASL_ZONES[toZone]!;
@@ -40,3 +46,5 @@ export async function saveDeliveryPricing(value:unknown,expectedVersion:number,a
  if(!saved)throw Error("settings_changed_reload");await tx.execute(sql`INSERT INTO sharefast_delivery_pricing_history(version,settings,updated_by)VALUES(${saved.version},${JSON.stringify(clean)}::jsonb,${actorId})`);return{version:saved.version,settings:clean};
  });
 }
+
+export function pricingDestinations(fromZone:string){return [...new Set([...Object.keys(WASL_ZONES),...(fromZone==="المنصورة"?Object.keys(MANSOURA_AREA_DEFAULTS):[])])];}

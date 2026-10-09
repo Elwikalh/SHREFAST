@@ -1,12 +1,12 @@
 import { authorizeWasl } from "@/lib/wasl-access";
 import { readLimitedBody } from "@/lib/sharefast-protocol";
-import { loadDeliveryPricing,saveDeliveryPricing,previewDeliveryQuote } from "@/lib/delivery-pricing-settings";
+import { loadDeliveryPricing,saveDeliveryPricing,previewDeliveryQuote,pricingDestinations } from "@/lib/delivery-pricing-settings";
 import { WASL_ZONES } from "@/lib/wasl-store";
 export const dynamic="force-dynamic";
 const reply=(body:unknown,status=200)=>Response.json(body,{status,headers:{"Cache-Control":"no-store"}});
 export async function GET(request:Request){
  const user=await authorizeWasl(request,"admin/control");if(user instanceof Response)return user;if(user.role!=="admin")return reply({ok:false,error:"forbidden"},403);
- try{const current=await loadDeliveryPricing();const fromZone=new URL(request.url).searchParams.get("fromZone")||"المنصورة";const previews=Object.keys(WASL_ZONES).map(zone=>previewDeliveryQuote(current.settings,fromZone,zone));return reply({ok:true,...current,fromZone,previews,activation:"draft-preview-only"});}catch(e){return reply({ok:false,error:e instanceof Error&&e.message==="unsupported_zone"?"unsupported_zone":"storage_unavailable"},e instanceof Error&&e.message==="unsupported_zone"?400:503);}
+ try{const current=await loadDeliveryPricing();const fromZone=new URL(request.url).searchParams.get("fromZone")||"المنصورة";const previews=pricingDestinations(fromZone).map(zone=>previewDeliveryQuote(current.settings,fromZone,zone));return reply({ok:true,...current,fromZone,pickupZones:Object.keys(WASL_ZONES),previews,activation:"draft-preview-only"});}catch(e){return reply({ok:false,error:e instanceof Error&&e.message==="unsupported_zone"?"unsupported_zone":"storage_unavailable"},e instanceof Error&&e.message==="unsupported_zone"?400:503);}
 }
 export async function POST(request:Request){
  const user=await authorizeWasl(request,"admin/control");if(user instanceof Response)return user;if(user.role!=="admin")return reply({ok:false,error:"forbidden"},403);

@@ -1,7 +1,7 @@
 import {it,expect,vi,beforeEach} from "vitest";
 const f=vi.hoisted(()=>({authorize:vi.fn(),load:vi.fn(),save:vi.fn(),preview:vi.fn()}));
 vi.mock("@el7bboB/db",()=>({db:{}}));
-vi.mock("@/lib/wasl-access",()=>({authorizeWasl:f.authorize}));vi.mock("@/lib/delivery-pricing-settings",()=>({loadDeliveryPricing:f.load,saveDeliveryPricing:f.save,previewDeliveryQuote:f.preview}));
+vi.mock("@/lib/wasl-access",()=>({authorizeWasl:f.authorize}));vi.mock("@/lib/delivery-pricing-settings",()=>({loadDeliveryPricing:f.load,saveDeliveryPricing:f.save,previewDeliveryQuote:f.preview,pricingDestinations:()=>["المنصورة"]}));
 import {GET,POST} from "../app/api/wasl/admin/delivery-pricing/route";
 const url="https://test.invalid/api/wasl/admin/delivery-pricing";
 beforeEach(()=>{vi.clearAllMocks();f.authorize.mockResolvedValue({role:"admin",id:"admin1"});f.load.mockResolvedValue({version:0,settings:{}});f.save.mockResolvedValue({version:1,settings:{}});f.preview.mockReturnValue({feeEGP:25,estimated:true});});

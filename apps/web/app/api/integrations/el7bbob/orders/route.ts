@@ -17,12 +17,13 @@ const reply = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 async function handle(request: Request): Promise<Response> {
   try {
-    const { secret, merchantRef, companyRef } = bridgeConfig();
+    const { secret, merchantRef, companyRef, requireQuotes } = bridgeConfig();
     const raw = await readLimitedBody(request);
     if (!verifySignature(secret, request, raw))
       return reply({ ok: false, error: "invalid_signature" }, 401);
     if (request.method === "POST") {
       const envelope = parseEnvelope(JSON.parse(raw));
+      if(requireQuotes&&!envelope.quote)return reply({ok:false,error:"quote_required"},409);
       const result = await createBridgeOrder(envelope, merchantRef, companyRef);
       return reply(
         { ok: true, order: result.order },

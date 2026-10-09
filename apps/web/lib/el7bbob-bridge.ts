@@ -1,3 +1,4 @@
+import {ensureQuoteTable,claimBridgeQuote,QuoteError} from "./el7bbob-quotes";
 import { sql } from "drizzle-orm";
 import { db } from "@el7bboB/db";
 import { ensureTables, ensureClientInviteTables } from "./wasl-store";
@@ -56,6 +57,7 @@ export function bridgeConfig() {
     secret,
     merchantRef,
     companyRef: process.env.SHAREFAST_EL7BBOB_COMPANY_REF || "",
+    requireQuotes: process.env.SHAREFAST_EL7BBOB_REQUIRE_QUOTES !== "false",
   };
 }
 type Stored = { ref: string; status: string; courier: string | null };
@@ -73,6 +75,7 @@ export async function createBridgeOrder(
   companyRef = "",
 ) {
   await ensureBridgeTables();
+  if(envelope.quote)await ensureQuoteTable();
   const hash = payloadHash(envelope);
   return db.transaction(async (tx) => {
     // Unique reservation + row lock serializes concurrent retries. A failed insert rolls back the reservation too.
@@ -116,6 +119,7 @@ export async function createBridgeOrder(
       ).length
     )
       throw new BridgeError("company_binding_requires_review", 409);
+    try{await claimBridgeQuote(tx,envelope,merchantRef);}catch(e){if(e instanceof QuoteError)throw new BridgeError(e.code,e.status);throw e;}
     // The trusted restaurant's charged delivery fee is a contract amount, not a new quote.
     // No changes to the generic merchant API, pricing guard, sessions or payment confirmations.
     const note = `[الحبوب ${envelope.displayNumber} / ${envelope.branchCode}] ${envelope.note}`;

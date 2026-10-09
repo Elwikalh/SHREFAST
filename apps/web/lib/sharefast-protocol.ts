@@ -5,6 +5,7 @@ export const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type DeliveryEnvelope = {
   version: 1;
+  quote?: {id:string;acceptedAt:string};
   preparation?: { estimatedAt: string; estimatedReadyAt: string | null; needsReview?: boolean };
   externalOrderId: string;
   displayNumber: string;
@@ -47,7 +48,7 @@ export function parseEnvelope(value: unknown): DeliveryEnvelope {
     "source",
   ];
   if (
-    Object.keys(v).some((k) => !keys.includes(k) && k !== "preparation") ||
+    Object.keys(v).some((k) => !keys.includes(k) && k !== "preparation" && k !== "quote") ||
     keys.some((k) => !(k in v))
   )
     throw new Error("invalid_fields");
@@ -109,6 +110,11 @@ export function parseEnvelope(value: unknown): DeliveryEnvelope {
     if (!p || typeof p !== "object" || Array.isArray(p) || Object.keys(p).some(k=>!["estimatedAt","estimatedReadyAt","needsReview"].includes(k)) || ("needsReview" in p && typeof p.needsReview !== "boolean") || !iso(p.estimatedAt) || !(p.estimatedReadyAt === null || iso(p.estimatedReadyAt))) throw new Error("invalid_fields");
     if (p.estimatedReadyAt !== null && (Date.parse(p.estimatedReadyAt as string) < Date.parse(p.estimatedAt) || Date.parse(p.estimatedReadyAt as string) - Date.parse(p.estimatedAt) > 180 * 60000)) throw new Error("invalid_fields");
     result.preparation = { estimatedAt: p.estimatedAt, estimatedReadyAt: p.estimatedReadyAt as string | null, ...("needsReview" in p?{needsReview:p.needsReview as boolean}:{}) };
+  }
+  if ("quote" in v) {
+    const q=v.quote as Record<string,unknown>;
+    if(!q||typeof q!=="object"||Array.isArray(q)||Object.keys(q).sort().join(",")!=="acceptedAt,id"||typeof q.id!=="string"||!UUID.test(q.id)||typeof q.acceptedAt!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(q.acceptedAt)||!Number.isFinite(Date.parse(q.acceptedAt))||new Date(q.acceptedAt).toISOString()!==q.acceptedAt)throw new Error("invalid_fields");
+    result.quote={id:q.id,acceptedAt:q.acceptedAt};
   }
   return result;
 }
