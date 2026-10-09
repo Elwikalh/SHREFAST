@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { apiFetch } from "@/lib/wasl-api";
+export type CourierNetworkView={online:boolean;canToggle:boolean;setOnline:(next:boolean)=>void;content:ReactNode};
 type Setting={enabled:boolean;revision:number};
 type Offer={ref:string;merchantName:string;pickupZone:string;destinationZone:string;feeEGP:number;readyMinutes:number|null;readyAt:string|null;restaurantPriority:boolean};
 const messages:Record<string,string>={
@@ -11,7 +12,7 @@ const messages:Record<string,string>={
   offer_unavailable:"الطلب اتغير أو قبله مندوب آخر؛ لم نحجزه لك.",
   settings_changed_reload:"الإعداد تغير من جلسة أخرى؛ أعد تحميله قبل التعديل.",
 };
-export default function FreelanceDispatchPanel({accountId,role}:{accountId:string;role:"merchant"|"courier"}) {
+export default function FreelanceDispatchPanel({accountId,role,renderCourier}:{accountId:string;role:"merchant"|"courier";renderCourier?:(view:CourierNetworkView)=>ReactNode}) {
   const [setting,setSetting]=useState<Setting|null>(null),[offers,setOffers]=useState<Offer[]>([]),
     [busyCourier,setBusyCourier]=useState(false),[working,setWorking]=useState(false),
     [message,setMessage]=useState(""),[failed,setFailed]=useState(false),
@@ -41,10 +42,10 @@ export default function FreelanceDispatchPanel({accountId,role}:{accountId:strin
     document.addEventListener("visibilitychange",onVisible);
     return()=>{c.abort();clearInterval(timer);document.removeEventListener("visibilitychange",onVisible);};
   },[role,setting?.enabled]);
-  async function toggle() {
+  async function toggle(next?:boolean) {
     if(!setting || working || pending)return;setWorking(true);setMessage("");
     try{const r=await apiFetch("/api/wasl/freelance/settings",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({enabled:!setting.enabled,expectedRevision:setting.revision})});const j=await r.json();
+      body:JSON.stringify({enabled:next??!setting.enabled,expectedRevision:setting.revision})});const j=await r.json();
       if(!r.ok || !j.ok){if(r.status===409){const current=await apiFetch("/api/wasl/freelance/settings",{cache:"no-store"});const data=await current.json();if(current.ok && data.ok)setSetting(data.setting);}
         throw Error(messages[j.error]||"لم نتأكد من حفظ الإعداد؛ أعد تحميله قبل التغيير.");}
       setSetting(j.setting);setOffers([]);setMessage(j.setting.enabled?"تم تفعيل استقبال عروض الشبكة.":"تم إيقاف استقبال عروض الشبكة؛ المهام المقبولة لم تتغير.");
@@ -64,6 +65,23 @@ export default function FreelanceDispatchPanel({accountId,role}:{accountId:strin
     }catch(e){setMessage(e instanceof Error?e.message:"الرد غير مؤكد؛ أعد التحقق من نفس الطلب.");}finally{setWorking(false);}
   }
   const shown=setting?.enabled && !busyCourier && !failed?offers:[];
+  if(role==="courier" && renderCourier) {
+    const content=<section aria-label="عروض شبكة المناديب" style={{display:"grid",gap:12,marginBottom:16}}>
+      {message && <p role="status" style={{fontSize:13,lineHeight:1.8}}>{message}</p>}
+      {pending && <div className="bigcard"><p>نتيجة قبول {pending} لم تُحسم. تحقق من نفس الطلب قبل أي قبول آخر.</p>
+        <button className="btn btn-p" type="button" disabled={working} onClick={()=>void claim(pending)}>إعادة التحقق من نفس الطلب</button></div>}
+      {confirmed && <div className="bigcard"><p>مرجع الطلب: {confirmed.ref} — الحالة المسجلة: {confirmed.status}</p>
+        <button className="btn btn-p" type="button" onClick={()=>window.location.reload()}>تحديث لوحة طلباتي وفتح التفاصيل</button></div>}
+      {shown.map(o=><article className="bigcard" key={o.ref} style={{borderColor:"var(--brand)"}}>
+        <b>{o.merchantName} — {o.ref}</b>{o.restaurantPriority?<p>أولوية الحبوب</p>:null}
+        <p>{o.pickupZone} ← {o.destinationZone} · رسوم التوصيل على الطلب {o.feeEGP} ج.م</p>
+        <p>{o.readyAt?"المطبخ أعلن أن الطلب جاهز للاستلام":o.readyMinutes!==null?`مدة تجهيز تقديرية: ${o.readyMinutes} دقيقة؛ ليست إعلان جاهزية`:"الوقت لم يُحدد؛ ننتظر تأكيد المطبخ"}</p>
+        <button className="btn btn-p" style={{width:"100%",minHeight:44}} type="button" disabled={working || !!pending} onClick={()=>void claim(o.ref)}>قبول هذا الطلب</button>
+      </article>)}
+    </section>;
+    return renderCourier({online:setting?.enabled===true,canToggle:!!setting && !working && !pending,
+      setOnline:next=>void toggle(next),content});
+  }
   return <section className="portal-review-notice" aria-label="عروض شبكة المناديب">
     <h2>{role==="merchant"?"إتاحة الطلبات لشبكة المندوبين":"عروض الطلبات المستقلة"}</h2>
     <p>{role==="merchant"?"تفعيل صريح لطلبات نشاطك غير المسندة لشركة أو مندوب فقط. لا يغير رحلة مقبولة. طلبات الحبوب القادمة من الربط الموقّع تطلب الشبكة تلقائيًا، ولا يوقفها هذا المفتاح."

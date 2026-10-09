@@ -112,12 +112,12 @@ export default function WaslClient({ quickRequest = false }: { quickRequest?: bo
 				</div>
 			)}
 			{user.role === "courier" && <PreparationAlerts accountId={user.id} />}
-      {(user.role === "merchant" || user.role === "courier") && <FreelanceDispatchPanel key={"dispatch:"+user.id} accountId={user.id} role={user.role} />}
+      {user.role === "merchant" && <FreelanceDispatchPanel key={"dispatch:"+user.id} accountId={user.id} role="merchant" />}
 			{user.role === "admin" && <Link href="/wasl/delivery-pricing">إعدادات تسعيرة التوصيل</Link>}
 			{user.role === "merchant" && <OwnedPolicyBanner key={"policy:"+user.id} accountId={user.id} />}
 			{["admin","merchant","company"].includes(user.role) && <DispatchQueuePanel key={"queue:"+user.id} accountId={user.id} />}
 			{user.role === "admin" && <Link href="/wasl/owned-restaurants">سياسة الحبوب والفروع الموثقة</Link>}
-			<Portal principal={user} />
+			{user.role === "courier" ? <FreelanceDispatchPanel key={"dispatch:"+user.id} accountId={user.id} role="courier" renderCourier={network => <Portal principal={user} courierNetwork={network} />} /> : <Portal principal={user} />}
 		</>
 	);
 }

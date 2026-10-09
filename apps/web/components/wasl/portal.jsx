@@ -11844,6 +11844,10 @@ function Vm({ store: e }) {
 										}),
 										(0, p.jsx)("button", {
 											className: "tgl",
+											role: "switch",
+											"aria-label": "متاح للعمل",
+											"aria-checked": t,
+											disabled: !e.courierCanToggle,
 											style: {
 												marginTop: 6,
 												background: t ? "#34d399" : "rgba(255,255,255,.35)",
@@ -11858,6 +11862,7 @@ function Vm({ store: e }) {
 					(0, p.jsxs)("div", {
 						className: "app-body",
 						children: [
+							Ia === "home" && e.courierOfferContent,
 							Ia === "home" &&
 								(i
 									? y
@@ -11889,7 +11894,7 @@ function Vm({ store: e }) {
 																	}),
 																	(0, p.jsx)("b", {
 																		style: { fontSize: 15.5 },
-																		children: "أنت جاهز للعمل",
+																		children: "استقبال الطلبات مفعّل",
 																	}),
 																	(0, p.jsx)("p", {
 																		style: {
@@ -11899,7 +11904,7 @@ function Vm({ store: e }) {
 																			lineHeight: 1.9,
 																		},
 																		children:
-																			"الطلبات المتاحة في الشبكة تظهر هنا فورًا — أول من يقبل ياخد الطلب.",
+																			"العروض المناسبة تظهر هنا وتتحدث كل 15 ثانية أثناء فتح التطبيق. قبول الطلب يحتاج تأكيد الخادم.",
 																	}),
 																],
 															}),
@@ -13927,7 +13932,7 @@ function x2({ goPortal: e, toast: a }) {
 				],
 			});
 }
-function L2({ principal }) {
+function L2({ principal, courierNetwork }) {
  const router = useRouter();
 	let e = (() => {
 			let N = (location.hash || "").replace(/^#/, ""),
@@ -14061,8 +14066,10 @@ function L2({ principal }) {
 	let je = {
 		orders: r,
 		couriers: C,
-		courierOn: I,
-		setCourierOn: h,
+		courierOn: courierNetwork ? courierNetwork.online : I,
+		setCourierOn: courierNetwork ? courierNetwork.setOnline : h,
+		courierCanToggle: courierNetwork ? courierNetwork.canToggle : true,
+		courierOfferContent: courierNetwork?.content,
 		newRequest: za,
 		acceptOrder: jt,
 		declineOrder: ba,
@@ -14249,6 +14256,7 @@ function L2({ principal }) {
 	});
 }
 
-export default function WaslPortal({ principal }) {
-	return jsxRuntime.jsx(Xm, { children: jsxRuntime.jsx(L2, { principal }) });
+/** @param {{principal: any, courierNetwork?: import("./freelance-dispatch-panel").CourierNetworkView}} props */
+export default function WaslPortal({ principal, courierNetwork }) {
+	return jsxRuntime.jsx(Xm, { children: jsxRuntime.jsx(L2, { principal, courierNetwork }) });
 }

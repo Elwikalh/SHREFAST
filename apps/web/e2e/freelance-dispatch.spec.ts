@@ -32,9 +32,11 @@ test("courier sees redacted offer and server-confirmed acceptance",async({page})
 });
 test("offline courier does not fetch offers until explicit activation",async({page})=>{
   const state=await mock(page,"courier",false);await page.goto("/wasl");
-  const enable=panel(page).getByRole("button",{name:"تفعيل عروض الشبكة",exact:true});
+  const enable=page.getByRole("switch",{name:"متاح للعمل",exact:true});
+  await expect(page.getByRole("button",{name:"تفعيل عروض الشبكة",exact:true})).toHaveCount(0);
+  await expect(enable).not.toBeChecked();
   await expect(enable).toBeEnabled();expect(state.offersReads).toBe(0);
-  await enable.click();await expect(panel(page).getByRole("button",{name:"قبول هذا الطلب"})).toBeVisible();
+  await enable.click();await expect(enable).toBeChecked();await expect(panel(page).getByRole("button",{name:"قبول هذا الطلب"})).toBeVisible();
   expect(state.settingBodies).toEqual([{enabled:true,expectedRevision:1}]);
 });
 test("lost claim acknowledgement locks other actions and recovers the same ref after reload",async({page})=>{
@@ -65,4 +67,22 @@ test("merchant opt-in sends no identity, fee or courier fields",async({page})=>{
   await expect(panel(page)).toContainText("تم تفعيل استقبال عروض الشبكة");
   expect(state.settingBodies).toEqual([{enabled:true,expectedRevision:1}]);
   expect(state.offersReads).toBe(0);expect(errors.filter(e=>e.includes("same key"))).toEqual([]);
+});test("single visible switch persists offline and does not cancel a claim",async({page})=>{
+  const state=await mock(page);await page.goto("/wasl");
+  const toggle=page.getByRole("switch",{name:"متاح للعمل",exact:true});
+  await expect(toggle).toHaveCount(1);await expect(toggle).toBeChecked();
+  await expect(page.getByRole("button",{name:"إيقاف عروض الشبكة",exact:true})).toHaveCount(0);
+  await expect(panel(page).locator("xpath=ancestor::div[contains(@class,'app-body')]" )).toHaveCount(1);
+  await toggle.click();await expect(toggle).not.toBeChecked();
+  await expect(panel(page).getByRole("button",{name:"قبول هذا الطلب"})).toHaveCount(0);
+  expect(state.settingBodies).toEqual([{enabled:false,expectedRevision:1}]);expect(state.claimRefs).toEqual([]);
+  await page.reload();await expect(toggle).not.toBeChecked();
+});
+test("failed save never turns the courier switch on",async({page})=>{
+  await mock(page,"courier",false);await page.route("**/api/wasl/freelance/settings",async route=>{
+    await route.fulfill({status:route.request().method()==="POST"?503:200,contentType:"application/json",body:JSON.stringify(route.request().method()==="POST"?{ok:false,error:"unavailable"}:{ok:true,setting:{enabled:false,revision:1}})});
+  });
+  await page.goto("/wasl");const toggle=page.getByRole("switch",{name:"متاح للعمل",exact:true});
+  await expect(toggle).toBeEnabled();await toggle.click();await expect(panel(page)).toContainText("لم نتأكد من حفظ الإعداد");
+  await expect(toggle).not.toBeChecked();await expect(page.getByText("استقبال الطلبات مفعّل",{exact:true})).toHaveCount(0);
 });
