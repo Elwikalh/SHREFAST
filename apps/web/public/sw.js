@@ -24,3 +24,15 @@ self.addEventListener("fetch", event=>{
   event.respondWith((async()=>{const cached=await caches.match(request)||await caches.match(url.pathname);if(cached)return cached;return fetch(request)})());
  }
 });
+
+// Foreground-generated readiness notifications open the account portal only.
+self.addEventListener("notificationclick", event => {
+ event.notification.close();
+ event.waitUntil((async()=>{
+  const target=new URL("/wasl",self.location.origin).href;
+  const windows=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+  const existing=windows.find(client=>{try{return new URL(client.url).origin===self.location.origin&&new URL(client.url).pathname==="/wasl"}catch{return false}});
+  if(existing){await existing.focus();return;}
+  if(self.clients.openWindow)await self.clients.openWindow(target);
+ })());
+});

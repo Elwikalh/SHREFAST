@@ -1,0 +1,13 @@
+import {it,expect,vi,beforeEach} from "vitest";
+const f=vi.hoisted(()=>({authorize:vi.fn(),load:vi.fn(),save:vi.fn(),preview:vi.fn()}));
+vi.mock("@el7bboB/db",()=>({db:{}}));
+vi.mock("@/lib/wasl-access",()=>({authorizeWasl:f.authorize}));vi.mock("@/lib/delivery-pricing-settings",()=>({loadDeliveryPricing:f.load,saveDeliveryPricing:f.save,previewDeliveryQuote:f.preview,pricingDestinations:()=>["المنصورة"]}));
+import {GET,POST} from "../app/api/wasl/admin/delivery-pricing/route";
+const url="https://test.invalid/api/wasl/admin/delivery-pricing";
+beforeEach(()=>{vi.clearAllMocks();f.authorize.mockResolvedValue({role:"admin",id:"admin1"});f.load.mockResolvedValue({version:0,settings:{}});f.save.mockResolvedValue({version:1,settings:{}});f.preview.mockReturnValue({feeEGP:25,estimated:true});});
+it("denied actor cannot read or write settings",async()=>{f.authorize.mockResolvedValue(Response.json({error:"forbidden"},{status:403}));expect((await GET(new Request(url))).status).toBe(403);expect((await POST(new Request(url,{method:"POST",body:'{}'}))).status).toBe(403);expect(f.load).not.toHaveBeenCalled();expect(f.save).not.toHaveBeenCalled();});
+it("uses protected admin resource and no-store responses",async()=>{const req=new Request(url);const res=await GET(req);expect(res.status).toBe(200);expect(f.authorize).toHaveBeenCalledWith(req,"admin/control");expect(res.headers.get("cache-control")).toBe("no-store");expect((await res.json()).activation).toBe("draft-preview-only");});
+it("uses server actor rather than user-provided actor/ref",async()=>{const res=await POST(new Request(url,{method:"POST",body:JSON.stringify({expectedVersion:0,settings:{}})}));expect(res.status).toBe(200);expect(f.save).toHaveBeenCalledWith({},0,"admin1");expect((await POST(new Request(url,{method:"POST",body:JSON.stringify({expectedVersion:0,settings:{},actorId:"fake"})}))).status).toBe(400);});
+it("maps stale settings to conflict not silent overwrite",async()=>{f.save.mockRejectedValue(Error("settings_changed_reload"));expect((await POST(new Request(url,{method:"POST",body:JSON.stringify({expectedVersion:0,settings:{}})}))).status).toBe(409);});
+it("rejects malformed null and oversized submissions",async()=>{for(const body of ["null","{","x".repeat(20000)])expect((await POST(new Request(url,{method:"POST",body}))).status).toBe(400);});
+it("does not return cached prices when storage fails",async()=>{f.load.mockRejectedValue(Error("db"));expect((await GET(new Request(url))).status).toBe(503);});

@@ -1,0 +1,15 @@
+import {it,expect,vi,beforeEach} from "vitest";
+const f=vi.hoisted(()=>({config:vi.fn(),ready:vi.fn()}));
+vi.mock("@/lib/el7bbob-bridge",()=>{class BridgeError extends Error {code:string;status:number;constructor(code:string,status:number){super(code);this.code=code;this.status=status;}}return {BridgeError,bridgeConfig:f.config};});
+vi.mock("@/lib/el7bbob-preparation",()=>({markBridgeOrderReady:f.ready}));
+import {POST} from "../app/api/integrations/el7bbob/preparation/route";
+import {signedHeaders} from "../lib/sharefast-protocol";
+import {BridgeError} from "../lib/el7bbob-bridge";
+const secret="test-only-long-secret-for-local-preparation-tests";const path="/api/integrations/el7bbob/preparation";const id="11111111-1111-4111-8111-111111111111";
+const req=(raw:string,signed=true)=>new Request("https://test.invalid"+path,{method:"POST",headers:signed?signedHeaders(secret,"POST",path,raw):{},body:raw});
+beforeEach(()=>{vi.clearAllMocks();f.config.mockReturnValue({secret,merchantRef:"bound"});f.ready.mockResolvedValue({externalOrderId:id,ref:"SX-1",eventId:"1",readyAt:"2026-10-09T10:00:00Z"});});
+it("rejects unsigned readiness before storage",async()=>{expect((await POST(req(JSON.stringify({externalOrderId:id,state:"ready"}),false))).status).toBe(401);expect(f.ready).not.toHaveBeenCalled();});
+it("binds signed readiness to server merchant and does not cache",async()=>{const res=await POST(req(JSON.stringify({externalOrderId:id,state:"ready"})));expect(res.status).toBe(200);expect(f.ready).toHaveBeenCalledWith(id,"bound");expect(res.headers.get("cache-control")).toBe("no-store");});
+it("rejects injected merchant, fake timestamps and invalid state",async()=>{for(const body of [{externalOrderId:id,state:"ready",merchantRef:"other"},{externalOrderId:id,state:"ready",readyAt:"now"},{externalOrderId:id,state:"preparing"},{externalOrderId:"bad",state:"ready"}])expect((await POST(req(JSON.stringify(body)))).status).toBe(400);expect(f.ready).not.toHaveBeenCalled();});
+it("rejects null malformed and oversized bodies",async()=>{for(const raw of ["null","{","a".repeat(20000)])expect((await POST(req(raw))).status).toBe(400);});
+it("disabled bridge cannot publish ready events",async()=>{f.config.mockImplementation(()=>{throw new BridgeError("bridge_disabled_or_unconfigured",503)});expect((await POST(req(JSON.stringify({externalOrderId:id,state:"ready"})))).status).toBe(503);expect(f.ready).not.toHaveBeenCalled();});
