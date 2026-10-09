@@ -17,7 +17,6 @@ export default function OwnedPolicyBanner({
   const [state, setState] = useState<{ policy?: Policy; error?: boolean }>({});
   useEffect(() => {
     const c = new AbortController();
-    setState({});
     apiFetch("/api/wasl/subscription-policy", { signal: c.signal })
       .then(async (r) => {
         if (!r.ok) throw Error();

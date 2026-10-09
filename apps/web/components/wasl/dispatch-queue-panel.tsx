@@ -23,7 +23,6 @@ export default function DispatchQueuePanel({
   useEffect(() => {
     const c = new AbortController();
     let loading = false;
-    setState({ orders: [], enabled: false, error: false });
     const refresh = async () => {
       if (loading) return;
       loading = true;

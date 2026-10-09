@@ -4,16 +4,16 @@ import { apiFetch } from "@/lib/wasl-api";
 type Entry = { ref: string; eventId: string | null; readyAt: string | null; preparation: { estimatedAt: string; estimatedReadyAt: string | null; needsReview?:boolean } | null };
 export default function PreparationAlerts({ accountId }: { accountId: string }) {
   const [orders, setOrders] = useState<Entry[]>([]), [failed,setFailed]=useState(false), [permission,setPermission]=useState<NotificationPermission | "unsupported">("unsupported");
-  const [now,setNow]=useState(Date.now());
+  const [now,setNow]=useState<number | null>(null);
   const seen = useRef(new Set<string>());
   useEffect(() => {
-    const timer=setInterval(()=>setNow(Date.now()),30000);return ()=>clearInterval(timer);
+    const tick=()=>setNow(Date.now());const initial=setTimeout(tick,0);const timer=setInterval(tick,30000);return ()=>{clearTimeout(initial);clearInterval(timer);};
   },[]);
   useEffect(() => {
     let stopped=false,busy=false;const controller=new AbortController();
     const key="sharefast-ready-seen:"+accountId;
     try { const ids=JSON.parse(localStorage.getItem(key)||"[]");seen.current=new Set(Array.isArray(ids)?ids.filter(x=>typeof x==="string"):[]); } catch {seen.current=new Set();}
-    if("Notification" in window)setPermission(Notification.permission);
+    const permissionTimer=setTimeout(()=>{if(!stopped && "Notification" in window)setPermission(Notification.permission);},0);
     async function poll() {
       if(busy || stopped)return;busy=true;
       try {
@@ -39,7 +39,7 @@ export default function PreparationAlerts({ accountId }: { accountId: string }) 
     }
     void poll();const timer=setInterval(poll,15000);
     const refresh=()=>{if(!document.hidden)void poll();};document.addEventListener("visibilitychange",refresh);
-    return()=>{stopped=true;controller.abort();clearInterval(timer);document.removeEventListener("visibilitychange",refresh);};
+    return()=>{stopped=true;controller.abort();clearInterval(timer);clearTimeout(permissionTimer);document.removeEventListener("visibilitychange",refresh);};
   },[accountId]);
   async function enable() {
     if("Notification" in window)try {setPermission(await Notification.requestPermission());}catch {setPermission("denied");}
@@ -51,7 +51,7 @@ export default function PreparationAlerts({ accountId }: { accountId: string }) 
     <p>وقت التجهيز تقديري. التنبيه يعتمد على إعلان المطبخ جاهزية الطلب. تنبيهات هذه النسخة تحتاج التطبيق مفتوحًا واتصالًا؛ إشعارات الخلفية لم تُفعّل بعد.</p>
     {failed && <p role="alert">تعذر تحديث الجاهزية؛ الحالة الحالية غير مؤكدة. ستتم إعادة المحاولة.</p>}
     <ul aria-live="polite">{orders.map(order=>{
-      const remaining=order.preparation?.estimatedReadyAt?Math.ceil((Date.parse(order.preparation.estimatedReadyAt)-now)/60000):null;
+      const remaining=order.preparation?.estimatedReadyAt && now !== null?Math.ceil((Date.parse(order.preparation.estimatedReadyAt)-now)/60000):null;
       return <li key={order.ref}><b>{order.ref}</b>: {order.readyAt ? "جاهز للاستلام" : remaining === null ? "جارٍ التجهيز — الوقت لم يُحدد" : remaining>0 ? `متبقي تقريبًا ${remaining} دقيقة` : "انتهى التقدير — ننتظر تأكيد المطبخ"}{!order.readyAt && order.preparation?.needsReview && <strong> · طلب كبير/تقدير يحتاج مراجعة؛ قد يتجاوز الوقت المبدئي؛ راجع المطبخ</strong>}</li>;
     })}</ul>
   </section>;

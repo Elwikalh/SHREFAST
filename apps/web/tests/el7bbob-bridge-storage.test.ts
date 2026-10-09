@@ -89,7 +89,7 @@ it("atomically consumes a frozen quote with one delivery on actual Wasl DDL",asy
  const {issueBridgeQuote}=await import("../lib/el7bbob-quotes");const q=await issueBridgeQuote("MAIN","ميدان مشعل","full-schema-restaurant");
  const e=parseEnvelope({...input,externalOrderId:"44444444-4444-4444-8444-444444444444",branchCode:"MAIN",destZone:q.destZone,feeEGP:q.feeEGP,totalEGP:100+q.feeEGP,quote:{id:q.id,acceptedAt:new Date().toISOString()}});
  const a=await createBridgeOrder(e,"full-schema-restaurant");const b=await createBridgeOrder(e,"full-schema-restaurant");expect(b.created).toBe(false);expect(b.order.ref).toBe(a.order.ref);
- expect((await database.query("SELECT external_order_id FROM sharefast_el7bbob_quotes WHERE id=$1",[q.id])).rows[0].external_order_id).toBe(e.externalOrderId);
+ expect((await database.query<{external_order_id: string}>("SELECT external_order_id FROM sharefast_el7bbob_quotes WHERE id=$1",[q.id])).rows[0]?.external_order_id).toBe(e.externalOrderId);
  expect((await database.query("SELECT fee,order_total FROM wasl_orders WHERE ref=$1",[a.order.ref])).rows[0]).toMatchObject({fee:15,order_total:115});
  await expect(createBridgeOrder({...e,externalOrderId:"55555555-5555-4555-8555-555555555555"},"full-schema-restaurant")).rejects.toMatchObject({code:"quote_already_used"});
  expect((await database.query("SELECT * FROM sharefast_el7bbob_links WHERE external_order_id='55555555-5555-4555-8555-555555555555'")).rows).toHaveLength(0);

@@ -26,8 +26,8 @@ export default function OwnedRestaurantsPage() {
     [form, setForm] = useState(blank),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
-  async function load() {
-    const r = await apiFetch("/api/wasl/admin/owned-restaurants");
+  async function load(signal?: AbortSignal) {
+    const r = await apiFetch("/api/wasl/admin/owned-restaurants", { signal });
     if (!r.ok)
       throw Error(
         r.status === 403
@@ -38,16 +38,16 @@ export default function OwnedRestaurantsPage() {
       );
     const v = await r.json();
     if (!v.ok) throw Error("تعذر التحقق.");
-    setData(v);
+    if (!signal?.aborted) setData(v);
   }
   useEffect(() => {
-    let active = true;
-    load().catch((e) => {
-      if (active) setMessage(e.message);
+    const controller = new AbortController();
+    void Promise.resolve().then(() => {
+      if (!controller.signal.aborted) return load(controller.signal);
+    }).catch((e) => {
+      if (!controller.signal.aborted) setMessage(e.message);
     });
-    return () => {
-      active = false;
-    };
+    return () => controller.abort();
   }, []);
   async function save(e: FormEvent) {
     e.preventDefault();

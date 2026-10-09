@@ -216,13 +216,13 @@ it("creation followed by cancellation serializes on the same link", async () => 
 });
 
  it("stores a real readiness event exactly once without changing delivery status",async()=>{
-  await createBridgeOrder(input,"restaurant");const a=await markBridgeOrderReady(input.externalOrderId,"restaurant");const b=await markBridgeOrderReady(input.externalOrderId,"restaurant");expect(a.eventId).toBe(b.eventId);expect(a.readyAt).toBe(b.readyAt);expect((await database.query<{status:string}>("SELECT status FROM wasl_orders")).rows[0].status).toBe("searching");expect((await database.query("SELECT * FROM sharefast_preparation_events")).rows).toHaveLength(1);
+  await createBridgeOrder(input,"restaurant");const a=await markBridgeOrderReady(input.externalOrderId,"restaurant");const b=await markBridgeOrderReady(input.externalOrderId,"restaurant");expect(a.eventId).toBe(b.eventId);expect(a.readyAt).toBe(b.readyAt);expect((await database.query<{status:string}>("SELECT status FROM wasl_orders")).rows[0]?.status).toBe("searching");expect((await database.query("SELECT * FROM sharefast_preparation_events")).rows).toHaveLength(1);
  });
  it("cannot send readiness for another merchant or a cancelled order",async()=>{
   await createBridgeOrder(input,"restaurant");await expect(markBridgeOrderReady(input.externalOrderId,"other")).rejects.toThrow("binding_conflict");await cancelBridgeOrder(input.externalOrderId,"restaurant");await expect(markBridgeOrderReady(input.externalOrderId,"restaurant")).rejects.toThrow("preparation_update_not_allowed");expect((await database.query("SELECT * FROM sharefast_preparation_events")).rows).toHaveLength(0);
  });
  it("stores original absolute estimate but never treats elapsed ETA as ready",async()=>{
-  const preparation={estimatedAt:"2026-10-09T10:00:00.000Z",estimatedReadyAt:"2026-10-09T10:05:00.000Z"};await createBridgeOrder({...input,preparation},"restaurant");expect((await database.query<{preparation:unknown}>("SELECT preparation FROM sharefast_el7bbob_links")).rows[0].preparation).toEqual(preparation);expect((await database.query("SELECT * FROM sharefast_preparation_events")).rows).toHaveLength(0);
+  const preparation={estimatedAt:"2026-10-09T10:00:00.000Z",estimatedReadyAt:"2026-10-09T10:05:00.000Z"};await createBridgeOrder({...input,preparation},"restaurant");expect((await database.query<{preparation:unknown}>("SELECT preparation FROM sharefast_el7bbob_links")).rows[0]?.preparation).toEqual(preparation);expect((await database.query("SELECT * FROM sharefast_preparation_events")).rows).toHaveLength(0);
  });
  it("rejects malformed estimate timestamp and inverted/beyond-limit ETA",()=>{
   for(const preparation of [{estimatedAt:"bad",estimatedReadyAt:null},{estimatedAt:"2026-10-09T10:00:00.000Z",estimatedReadyAt:"2026-10-09T09:00:00.000Z"},{estimatedAt:"2026-10-09T10:00:00.000Z",estimatedReadyAt:"2026-10-09T14:00:00.000Z"}])expect(()=>parseEnvelope({...input,preparation})).toThrow("invalid_fields");

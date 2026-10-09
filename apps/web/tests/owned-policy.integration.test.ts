@@ -1,3 +1,4 @@
+import type { SQL } from "drizzle-orm";
 import { PGlite } from "@electric-sql/pglite";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { beforeAll, beforeEach, afterAll, it, expect, vi } from "vitest";
@@ -38,14 +39,14 @@ const command = () => ({
   confirmOwnership: true,
 });
 beforeAll(async () => {
-  f.execute.mockImplementation(async (q: any) => {
+  f.execute.mockImplementation(async (q: SQL) => {
     const s = dialect.sqlToQuery(q);
     return (await db.query(s.sql, s.params)).rows;
   });
   f.transaction.mockImplementation((cb) =>
     db.transaction((tx) =>
       cb({
-        execute: async (q: any) => {
+        execute: async (q: SQL) => {
           const s = dialect.sqlToQuery(q);
           return (await tx.query(s.sql, s.params)).rows;
         },
@@ -154,8 +155,8 @@ it("verified branch account inherits the root policy without any account role pr
     rootRef: "SX-2",
   });
   expect(
-    (await db.query(`SELECT role FROM wasl_accounts WHERE id='${childId}'`))
-      .rows[0].role,
+    (await db.query<{role:string}>(`SELECT role FROM wasl_accounts WHERE id='${childId}'`))
+      .rows[0]?.role,
   ).toBe("merchant");
   expect(
     (
@@ -297,7 +298,7 @@ it("courier cannot read global waiting queue; original courier predicate still g
       .sql`SELECT o.ref FROM wasl_orders o WHERE (${orderVisibilitySQL(courier)}) ORDER BY o.id`,
   );
   expect(
-    (await db.query(query.sql, query.params)).rows.map((x) => x.ref),
+    (await db.query<{ref:string}>(query.sql, query.params)).rows.map((x) => x.ref),
   ).toEqual(["SX-204", "SX-205"]);
 });
 it("same branch code cannot be double-enrolled; failed transaction creates no audit row", async () => {
@@ -330,8 +331,8 @@ it("concurrent admins cannot overwrite a newer branch revision or audit twice", 
   expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
   expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
   expect(
-    (await db.query("SELECT revision FROM sharefast_owned_restaurant_branches"))
-      .rows[0].revision,
+    (await db.query<{revision:number}>("SELECT revision FROM sharefast_owned_restaurant_branches"))
+      .rows[0]?.revision,
   ).toBe(2);
   expect(
     (await db.query("SELECT * FROM sharefast_owned_restaurant_audit")).rows,

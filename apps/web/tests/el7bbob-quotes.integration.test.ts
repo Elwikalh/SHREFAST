@@ -1,3 +1,5 @@
+import type { SQL } from "drizzle-orm";
+import type { QuoteSnapshot } from "../lib/el7bbob-quotes";
 import { PGlite } from "@electric-sql/pglite";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { beforeAll, beforeEach, afterAll, it, expect, vi } from "vitest";
@@ -21,14 +23,15 @@ import {
 import { parseEnvelope } from "../lib/sharefast-protocol";
 const db = new PGlite(),
   dialect = new PgDialect();
-const exec = async (q: any) => {
+const exec = async (q: SQL) => {
   const s = dialect.sqlToQuery(q);
   return (await db.query(s.sql, s.params)).rows;
 };
-const transaction = (cb: any) =>
+type TestExecutor = { execute: typeof exec };
+const transaction = (cb: (tx: TestExecutor) => Promise<unknown>) =>
   db.transaction((tx) =>
     cb({
-      execute: async (q: any) => {
+      execute: async (q: SQL) => {
         const s = dialect.sqlToQuery(q);
         return (await tx.query(s.sql, s.params)).rows;
       },
@@ -36,7 +39,7 @@ const transaction = (cb: any) =>
   );
 const orderId = "11111111-1111-4111-8111-111111111111",
   otherId = "22222222-2222-4222-8222-222222222222";
-function envelope(q: any) {
+function envelope(q: QuoteSnapshot) {
   return parseEnvelope({
     version: 1,
     externalOrderId: orderId,
@@ -140,10 +143,10 @@ it("allows late outbox delivery only for acceptance inside original quote window
   const q = await issueBridgeQuote("MAIN", "ميدان مشعل", "restaurant"),
     e = envelope(q);
   vi.spyOn(Date, "now").mockReturnValue(Date.parse(q.expiresAt) + 3600000);
-  await transaction((tx: any) => claimBridgeQuote(tx, e, "restaurant"));
+  await transaction((tx: TestExecutor) => claimBridgeQuote(tx, e, "restaurant"));
   expect(
-    (await db.query("SELECT external_order_id FROM sharefast_el7bbob_quotes"))
-      .rows[0].external_order_id,
+    (await db.query<{external_order_id: string}>("SELECT external_order_id FROM sharefast_el7bbob_quotes"))
+      .rows[0]?.external_order_id,
   ).toBe(orderId);
   vi.restoreAllMocks();
 });
@@ -156,12 +159,12 @@ it("rejects price/zone/branch/root tampering and acceptance outside the window",
     { branchCode: "NEW" },
   ])
     await expect(
-      transaction((tx: any) =>
+      transaction((tx: TestExecutor) =>
         claimBridgeQuote(tx, { ...e, ...patch }, "restaurant"),
       ),
     ).rejects.toMatchObject({ code: "quote_mismatch" });
   await expect(
-    transaction((tx: any) => claimBridgeQuote(tx, e, "other")),
+    transaction((tx: TestExecutor) => claimBridgeQuote(tx, e, "other")),
   ).rejects.toMatchObject({ code: "quote_not_found" });
   for (const at of [
     new Date(Date.parse(q.issuedAt) - 1).toISOString(),
@@ -169,7 +172,7 @@ it("rejects price/zone/branch/root tampering and acceptance outside the window",
     "not-a-date",
   ])
     await expect(
-      transaction((tx: any) =>
+      transaction((tx: TestExecutor) =>
         claimBridgeQuote(
           tx,
           { ...e, quote: { id: q.id, acceptedAt: at } },
@@ -181,10 +184,10 @@ it("rejects price/zone/branch/root tampering and acceptance outside the window",
 it("one quote cannot fund two orders but exact claim replay is safe", async () => {
   const q = await issueBridgeQuote("MAIN", "ميدان مشعل", "restaurant"),
     e = envelope(q);
-  await transaction((tx: any) => claimBridgeQuote(tx, e, "restaurant"));
-  await transaction((tx: any) => claimBridgeQuote(tx, e, "restaurant"));
+  await transaction((tx: TestExecutor) => claimBridgeQuote(tx, e, "restaurant"));
+  await transaction((tx: TestExecutor) => claimBridgeQuote(tx, e, "restaurant"));
   await expect(
-    transaction((tx: any) =>
+    transaction((tx: TestExecutor) =>
       claimBridgeQuote(tx, { ...e, externalOrderId: otherId }, "restaurant"),
     ),
   ).rejects.toMatchObject({ code: "quote_already_used" });
@@ -196,7 +199,7 @@ it("rolls claim back when delivery creation fails in the same transaction", asyn
   const q = await issueBridgeQuote("MAIN", "ميدان مشعل", "restaurant"),
     e = envelope(q);
   await expect(
-    transaction(async (tx: any) => {
+    transaction(async (tx: TestExecutor) => {
       await claimBridgeQuote(tx, e, "restaurant");
       throw Error("create failed");
     }),
@@ -213,4 +216,4 @@ it("does not price a cross-city branch while delivery still inherits the root pi
   ).rejects.toMatchObject({ code: "branch_binding_requires_review" });
 });
 
-it("food and standalone quote purposes cannot be exchanged",async()=>{const food=await issueBridgeQuote("MAIN","ميدان مشعل","restaurant"),standalone=await issueBridgeQuote("MAIN","ميدان مشعل","restaurant","standalone");expect(standalone.requestKind).toBe("standalone");expect(food.requestKind).toBeUndefined();await expect(transaction((tx:any)=>claimBridgeQuote(tx,{...envelope(food),requestKind:"standalone",source:"staff_standalone"},"restaurant"))).rejects.toMatchObject({code:"quote_mismatch"});await expect(transaction((tx:any)=>claimBridgeQuote(tx,envelope(standalone),"restaurant"))).rejects.toMatchObject({code:"quote_mismatch"});await transaction((tx:any)=>claimBridgeQuote(tx,{...envelope(standalone),requestKind:"standalone",source:"staff_standalone"},"restaurant"));});
+it("food and standalone quote purposes cannot be exchanged",async()=>{const food=await issueBridgeQuote("MAIN","ميدان مشعل","restaurant"),standalone=await issueBridgeQuote("MAIN","ميدان مشعل","restaurant","standalone");expect(standalone.requestKind).toBe("standalone");expect(food.requestKind).toBeUndefined();await expect(transaction((tx: TestExecutor)=>claimBridgeQuote(tx,{...envelope(food),requestKind:"standalone",source:"staff_standalone"},"restaurant"))).rejects.toMatchObject({code:"quote_mismatch"});await expect(transaction((tx: TestExecutor)=>claimBridgeQuote(tx,envelope(standalone),"restaurant"))).rejects.toMatchObject({code:"quote_mismatch"});await transaction((tx: TestExecutor)=>claimBridgeQuote(tx,{...envelope(standalone),requestKind:"standalone",source:"staff_standalone"},"restaurant"));});
